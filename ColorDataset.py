@@ -32,7 +32,7 @@ MIN_USED = 2
 MAX_LEN = 10
 
 # Name for now
-class ColorLoader(data.Dataset):
+class ColorDataset(data.Dataset):
 # init?? self
     def __init__(self, vocab=None, train=True):
         with open(os.path.join(RAW_DIR, 'filteredCorpus.csv')) as fp:
@@ -251,4 +251,4 @@ class ColorLoader(data.Dataset):
 #3calling wont work
 #ColorLoader.__init__()
 
-color = ColorLoader()
+color = ColorDataset()
