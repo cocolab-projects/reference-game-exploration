@@ -93,20 +93,20 @@ def concatenate_by_round(texts, rounds):
             concat = texts[i]
     return concat_texts
 
-# def image_to_text_map(texts, HList, LList, SList):
-#     itemH,itemS,itemL,itemText = [], [], [], []
-#     roundCount = 0
-#     for i in enumerate:
-#         if rounds[i] != rounds[i+1]:
-#             itemH.append(df['clickColH'][i])
-#             itemS.append(df['clickColS'][i])
-#             itemL.append(df['clickColL'][i])
-#             itemText.append(texts[roundCount])
-#             roundCount += 1
-#     colorsToText = {hsl2rgb([itemH[i], itemS[i]/100, itemL[i]/100]):texts[i] for i in range(len(itemH))}
-#     textToColor = {texts[i]:hsl2rgb([itemH[i], itemS[i]/100, itemL[i]/100]) for i in range(len(itemH))}
+def image_to_text_map(texts, HList, LList, SList):
+    itemH,itemS,itemL,itemText = [], [], [], []
+    roundCount = 0
+    for i in enumerate:
+        if rounds[i] != rounds[i+1]:
+            itemH.append(df['clickColH'][i])
+            itemS.append(df['clickColS'][i])
+            itemL.append(df['clickColL'][i])
+            itemText.append(texts[roundCount])
+            roundCount += 1
+    colorsToText = {hsl2rgb([itemH[i], itemS[i]/100, itemL[i]/100]):texts[i] for i in range(len(itemH))}
+    textToColor = {texts[i]:hsl2rgb([itemH[i], itemS[i]/100, itemL[i]/100]) for i in range(len(itemH))}
 
-#     return colorsToText, textToColor
+    return colorsToText, textToColor
 
 def build_vocab(texts, minCount):
     w2c = defaultdict(int)
