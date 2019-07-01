@@ -1,0 +1,21 @@
+{
+    "seed": 4,
+    "name": "test",
+    "out_dir": "color_data",
+    "model": [
+      {
+        "bidir": true,
+        "file_path": "../models",
+        "dis": "close"
+      }
+    ],
+    "training": [
+        {
+          "batch_size": 100,
+          "learning_rate": 0.0002,
+          "epochs": 10,
+          "dim": 5,
+          "log_interval": 10
+        }
+      ]
+  }
