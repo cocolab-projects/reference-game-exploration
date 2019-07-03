@@ -160,7 +160,7 @@ class Engine(object):
                     file1 = open(completeName, "w")
                     file1.write(str(self.accuracy))
                     file1.close()
-                
+
         elif (self.distance == 'far'):
             if (self.bi):
 
@@ -185,8 +185,12 @@ class Engine(object):
                     file1 = open(completeName, "w")
                     file1.write(str(self.accuracy))
                     file1.close()
-                
 
+        # ref_dataset = Colors_ReferenceGame(self.vocab, split='Test',dis=self.distance)
+        # l3 = [x for x in ref_dataset.vocab if x not in self.train_dataset.vocab]
+        # print(l3)
+
+    
 
     def __init_model(self, config):
         print("init model")
@@ -228,7 +232,7 @@ class Engine(object):
                 'vocab_size': self.vocab_size,
             }, is_best, folder=self.out_dir)
             np.save(os.path.join(self.out_dir, 'loss.npy'), track_loss)
-        
+            
     def train_one_epoch(self, epoch): 
         #train a single epoch 
 

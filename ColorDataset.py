@@ -129,6 +129,8 @@ class ColorDataset(data.Dataset):
         i2w[indexCount+3] = PAD_TOKEN
 
         vocab = {'i2w': i2w, 'w2i': w2i}
+
+        # print(i2w)
         print("total number of words used at least twice: %d" % len(w2i))
         print("total number of different words: %d" % len(w2c.keys()))
         print("max number of word usage: %d" % max(w2c.values()))
