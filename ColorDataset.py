@@ -44,6 +44,7 @@ class ColorDataset(data.Dataset):
         self.texts = []
         self.rounds = []
         self.images = []
+        self.tokens = []
         self.textsList = [text for text in df['contents']]
         self.roundsList = [roundN for roundN in df['roundNum']]
         self.imagesList = list(zip([itemH for itemH in df['clickColH']], [itemS/100 for itemS in df['clickColS']], [itemL/100 for itemL in df['clickColL']]))
@@ -76,6 +77,7 @@ class ColorDataset(data.Dataset):
         n = len(texts)
         for i in range(n):
             tokens = preprocess_text(texts[i])
+            self.tokens = tokens + self.tokens
             input_tokens = [SOS_TOKEN] + tokens
             if len(input_tokens) > MAX_LEN-1:
                 input_tokens = input_tokens[:MAX_LEN-1] + [EOS_TOKEN]
@@ -141,8 +143,8 @@ class ColorDataset(data.Dataset):
 
     def __getitem__(self, index):
         return self.target_RGBs[index], self.inputs[index], self.lengths[index]
-
-
+    def get_textColor(self):
+        return self.tokens
 class Colors_ReferenceGame(data.Dataset):
     def __init__(self, vocab, split='Test', dis='far'):
         assert vocab is not None
@@ -159,7 +161,7 @@ class Colors_ReferenceGame(data.Dataset):
         self.tgt_images = []
         self.d1_images = []
         self.d2_image = []
-
+        self.tokens = []
         # Convert csv dataframe into python lists
         self.textsList = [text for text in df['contents']]
         self.roundsList = [roundN for roundN in df['roundNum']]
@@ -202,6 +204,7 @@ class Colors_ReferenceGame(data.Dataset):
         n = len(texts)
         for i in range(n):
             tokens = preprocess_text(texts[i])
+            self.tokens = tokens + self.tokens
             input_tokens = [SOS_TOKEN] + tokens
             if len(input_tokens) > MAX_LEN-1:
                 input_tokens = input_tokens[:MAX_LEN-1] + [EOS_TOKEN]
@@ -241,8 +244,8 @@ class Colors_ReferenceGame(data.Dataset):
 
     def __getitem__(self, index):
         return self.tgt_RGBs[index], self.d1_RGBs[index], self.d2_RGBs[index], self.inputs[index], self.lengths[index]
-
-
+    def get_textColor(self):
+        return self.tokens
 def hsl2rgb(hsl):
     """Convert HSL coordinates to RGB coordinates.
     https://www.rapidtables.com/convert/color/hsl-to-rgb.html

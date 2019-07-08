@@ -2,6 +2,11 @@ import os
 import os.path
 from os import path
 
+import nltk, collections
+from nltk.lm.preprocessing import padded_everygram_pipeline
+from nltk.lm import MLE
+from nltk.lm import Vocabulary
+
 import random 
 import sys
 import numpy as np
@@ -22,6 +27,7 @@ from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from ColorDataset import (ColorDataset, Colors_ReferenceGame)
 import fileinput
+import time 
 
 #Run through list in the data folder?
 
@@ -41,6 +47,7 @@ class Engine(object):
         args = parser.parse_args()
         
         args.cuda = args.cuda and torch.cuda.is_available()
+        self.time = 0
         self.fd = args.full_diagnostic
         self.device = torch.device('cuda' if args.cuda else 'cpu')
         self.loss = None
@@ -102,11 +109,14 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
+
         self.train_dataset = ColorDataset(split='Train', dis=self.distance)
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
+        
+        self.ref_dataset = ColorDataset(vocab=self.vocab, split='Test', dis=self.distance)
 
         self.test_dataset = ColorDataset(vocab=self.vocab, split='Validation', dis=self.distance)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
@@ -134,8 +144,8 @@ class Engine(object):
             self.load_best()
         self.final_loss()
         self.final_accuracy()
-
-             
+        self.final_time()
+        self.final_perplexity() 
         if (self.distance == 'close'):
             if (self.bi):
 
@@ -212,7 +222,7 @@ class Engine(object):
     def train(self):
         best_loss = float('inf')
         track_loss = np.zeros((self.epochs, 2))
-
+        t0 = time.time()
         for epoch in range(1, self.epochs + 1):
             t_loss = self.train_one_epoch(epoch)
             v_loss = self.validate_one_epoch(epoch)
@@ -232,7 +242,7 @@ class Engine(object):
                 'vocab_size': self.vocab_size,
             }, is_best, folder=self.out_dir)
             np.save(os.path.join(self.out_dir, 'loss.npy'), track_loss)
-            
+        self.time = time.time() - t0
     def train_one_epoch(self, epoch): 
         #train a single epoch 
 
@@ -345,5 +355,69 @@ class Engine(object):
             
         print(colored("==ending data (final loss)==", 'magenta'))
         print("")
+    def final_time(self):
+        print(colored("==begining data (final time)==", 'magenta'))
+        print(colored('====> Final Time: {:.4f}'.format(self.time),'cyan'))
+        print(colored("==ending data (final time)==", 'magenta'))
+        print("")
+    def final_perplexity(self):
+        corpus = ""
+        perp = 0
+        counter = 0
+
+        # for i in self.train_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+        # for i in self.ref_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+        # for i in self.test_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+
+        # print(corpus)
+
+        model = self.unigram(self.train_dataset.get_textColor())
+        model1 = self.unigram(self.ref_dataset.get_textColor())
+        model2 = self.unigram(self.test_dataset.get_textColor())
+
+        for i in self.train_dataset.get_textColor():
+            if (self.perplexity(i, model) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model)
+        for i in self.ref_dataset.get_textColor():
+            if (self.perplexity(i, model1) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model1)
+        for i in self.test_dataset.get_textColor():
+            if (self.perplexity(i, model2) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model2)
+
+
+        print(colored("==begining data (final perplexity)==", 'magenta'))
+        print(colored('====> Final Average Perplexity: {:.4f}'.format(perp/counter),'cyan'))
+        print(colored("==ending data (final perplexity)==", 'magenta'))
+        print("")
+
+    def unigram(self, tokens):    
+        model = collections.defaultdict(lambda: 0.01)
+        for f in tokens:
+            try:
+                model[f] += 1
+            except KeyError:
+                model [f] = 0
+                continue
+        N = float(sum(model.values()))
+        for word in model:
+            model[word] = model[word]/N
+        return model
+    
+    def perplexity(self, testset, model):
+        testset = testset.split()
+        perplexity = 1
+        N = 0
+        for word in testset:
+            N += 1
+            perplexity = perplexity * (1/model[word])
+        perplexity = pow(perplexity, 1/float(N)) 
+        return perplexity
 
 color = Engine()
