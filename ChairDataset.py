@@ -65,6 +65,7 @@ class ChairDataset(data.Dataset):
         self.roundsList = [roundN for roundN in df['trial_num']]
         self.imagesList = [img for img in df['target_chair']]
 
+        print(self.imagesList)
         length = len(self.textsList)
         train_len = int(length * TRAINING_PERCENTAGE)
         test_len = int(length * TESTING_PERCENTAGE)
@@ -85,7 +86,6 @@ class ChairDataset(data.Dataset):
         else:
             self.vocab = vocab
 
-
         df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
 
         self.data = df
@@ -95,7 +95,7 @@ class ChairDataset(data.Dataset):
         
 
         self.vocab_size = len(self.vocab['w2i'])
-        self.target_RGBs, self.texts = self.concatenate_by_round(self.texts, self.images, self.rounds)
+        self.target, self.texts = self.concatenate_by_round(self.texts, self.images, self.rounds)
         self.inputs, self.lengths, self.max_len = self.process_texts(self.texts)
 
     def remake(self, index):
@@ -103,7 +103,9 @@ class ChairDataset(data.Dataset):
         
         chair_target = chair_target + '.png'
         chair_names = list(self.names)
-        print(self.names)
+
+
+        #ERROR
         index_target = chair_names.index(chair_target)
         chair_target_np = self.images[index_target][index]
         chair_target_pt = torch.from_numpy(chair_target_np)
@@ -136,16 +138,16 @@ class ChairDataset(data.Dataset):
         return inputs, lengths, MAX_LEN
 
     def concatenate_by_round(self, texts, images, rounds):
-        concat_texts, target_RGBs = [], []
+        concat_texts, target = [], []
         concat = texts[0]
         for i in range(1, len(rounds)):
             if rounds[i] == rounds[i-1]:
                 concat += " " + texts[i]
             else:
-                target_RGBs.append(self.images[i-1])
+                target.append(self.images[i-1])
                 concat_texts.append(concat)
                 concat = texts[i]
-        return target_RGBs, concat_texts
+        return target, concat_texts
 
     def build_vocab(self, texts):
         w2c = defaultdict(int)
@@ -181,7 +183,7 @@ class ChairDataset(data.Dataset):
         return len(self.inputs)
 
     def __getitem__(self, index):
-        return self.target_RGBs[index], self.inputs[index], self.lengths[index]
+        return self.target[index], self.inputs[index], self.lengths[index]
 
 
 class Chairs_ReferenceGame(data.Dataset):
@@ -191,22 +193,32 @@ class Chairs_ReferenceGame(data.Dataset):
         with open(os.path.join(RAW_DIR, 'filteredCorpus.csv')) as fp:
             df = pd.read_csv(fp)
         # Only pick out data with true outcomes, far(=easy) conditions, and speaker text
-        df = df[df['outcome'] == True]
-        df = df[df['role'] == 'speaker']
-        df = df[df['condition'] == dis]
-        
+        df = df[df['correct'] == True]
+        df = df[df['communication_role'] == 'speaker']
+        # note that target_chair is always the chair 
+        # so label is always 3
+        df = df[df['context_condition'] == dis]
+
+
+        self.image_transform = transforms.Compose([
+            transforms.Resize(32),
+            transforms.CenterCrop(32),
+            transforms.ToTensor(),
+        ])
+
         self.texts = []
         self.rounds = []
         self.tgt_images = []
         self.d1_images = []
         self.d2_image = []
+        self.d3_image = []
 
-        # Convert csv dataframe into python lists
-        self.textsList = [text for text in df['contents']]
-        self.roundsList = [roundN for roundN in df['roundNum']]
-        self.tgt_imagesList = list(zip([itemH for itemH in df['clickColH']], [itemS/100 for itemS in df['clickColS']], [itemL/100 for itemL in df['clickColL']]))
-        self.d1_imagesList = list(zip([itemH for itemH in df['alt1ColH']], [itemS/100 for itemS in df['alt1ColS']], [itemL/100 for itemL in df['alt1ColL']]))
-        self.d2_imagesList = list(zip([itemH for itemH in df['alt2ColH']], [itemS/100 for itemS in df['alt2ColS']], [itemL/100 for itemL in df['alt2ColL']]))
+        self.d1_images = [text for text in df['chair_a']]
+        self.d2_image = [text for text in df['chair_b']]
+        self.d3_image = [text for text in df['chair_c']]
+        self.textsList = [text for text in df['text']]
+        self.roundsList = [roundN for roundN in df['trial_num']]
+        self.tgt_imagesList = [img for img in df['target_chair']]
 
         length = len(self.textsList)
         train_len = int(length * TRAINING_PERCENTAGE)
@@ -217,18 +229,24 @@ class Chairs_ReferenceGame(data.Dataset):
             self.tgt_images = self.tgt_imagesList[:train_len]
             self.d1_images = self.d1_imagesList[:train_len]
             self.d2_images = self.d2_imagesList[:train_len]
+            self.d3_images = self.d3_imagesList[:train_len]
+
         elif split == 'Validation':
             self.texts = self.textsList[train_len:-test_len]
             self.rounds = self.roundsList[train_len:-test_len]
             self.tgt_images = self.tgt_imagesList[train_len:-test_len]
             self.d1_images = self.d1_imagesList[train_len:-test_len]
             self.d2_images = self.d2_imagesList[train_len:-test_len]
+            self.d3_images = self.d3_imagesList[train_len:-test_len]
+
         elif split == 'Test':
             self.texts = self.textsList[-test_len:]
             self.rounds = self.roundsList[-test_len:]
             self.tgt_images = self.tgt_imagesList[-test_len:]
             self.d1_images = self.d1_imagesList[-test_len:]
             self.d2_images = self.d2_imagesList[-test_len:]
+            self.d3_images = self.d3_imagesList[-test_len:]
+
         if vocab is None:
             self.vocab = self.build_vocab(self.texts)
         else:
@@ -240,8 +258,8 @@ class Chairs_ReferenceGame(data.Dataset):
         
 
         self.vocab_size = len(self.vocab['w2i'])
-        self.tgt_RGBs, self.d1_RGBs, self.d2_RGBs, self.texts = \
-                self.concatenate_by_round(self.texts, self.tgt_images, self.d1_images, self.d2_images, self.rounds)
+        self.tgt, self.d1, self.d2, self.d3, self.texts = \
+                self.concatenate_by_round(self.texts, self.tgt_images, self.d1_images, self.d2_images, self.d3_images, self.rounds)
         self.inputs, self.lengths, self.max_len = self.process_texts(self.texts)
 
     def process_texts(self, texts):
@@ -280,28 +298,31 @@ class Chairs_ReferenceGame(data.Dataset):
 
         return chair_target
 
-    def concatenate_by_round(self, texts, tgt_images, d1_images, d2_images, rounds):
-        concat_texts, tgt_RGBs, d1_RGBs, d2_RGBs = [], [], [], []
+    def concatenate_by_round(self, texts, tgt_images, d1_images, d2_images, d3_images, rounds):
+        concat_texts, tgt, d1, d2 = [], [], [], []
         concat = texts[0]
         for i in range(1, len(rounds)):
             if rounds[i] == rounds[i-1]:
                 concat += " " + texts[i]
             else:
-                tgt_rawRGB = np.array(tgt_images[i-1])
-                tgt_RGBs.append(tgt_rawRGB)
-                d1_rawRGB = np.array(tgt_images[i-1])
-                d1_RGBs.append(d1_rawRGB)
-                d2_rawRGB = np.array(tgt_images[i-1])
-                d2_RGBs.append(d2_rawRGB)
+                tgt_raw= np.array(tgt_images[i-1])
+                tgt.append(tgt_raw)
+                d1_raw = np.array(d1_images[i-1])
+                d1.append(d1_raw)
+                d2_raw = np.array(d2_images[i-1])
+                d2.append(d2_raw)
+                d3_raw = np.array(d3_images[i-1])
+                d3.append(d2_raw)
+
                 concat_texts.append(concat)
                 concat = texts[i]
-        return tgt_RGBs, d1_RGBs, d2_RGBs, concat_texts
+        return tgt, d1, d2, concat_texts
 
     def __len__(self):
         return len(self.inputs)
 
     def __getitem__(self, index):
-        return self.tgt_RGBs[index], self.d1_RGBs[index], self.d2_RGBs[index], self.inputs[index], self.lengths[index]
+        return self.tgt[index], self.d1[index], self.d2[index], self.d3[index], self.inputs[index], self.lengths[index]
 
 
 def preprocess_text(text):
@@ -373,4 +394,5 @@ def preprocess_text(text):
         tokens.remove('')
     return tokens
 
+#Testing
 chair = ChairDataset()
