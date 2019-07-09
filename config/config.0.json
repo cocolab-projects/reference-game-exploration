@@ -14,7 +14,7 @@
           "batch_size": 100,
           "learning_rate": 0.0002,
           "epochs": 10,
-          "dim": 5,
+          "dim": 10,
           "log_interval": 10
         }
       ]

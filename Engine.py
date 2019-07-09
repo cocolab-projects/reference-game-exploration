@@ -1,6 +1,7 @@
 import os
 import os.path
 from os import path
+import nltk, collections
 
 import random 
 import sys
@@ -13,7 +14,7 @@ from ColorTraining import test,train
 from colorama import init 
 from termcolor import colored 
 from utils import (AverageMeter, save_checkpoint,get_text)
-from ColorModel import TextEmbedding, Supervised
+from ColorModel_Test import TextEmbedding, Supervised
 import torch 
 import torch.nn as nn
 import torch.optim as optim
@@ -22,6 +23,7 @@ from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from ColorDataset import (ColorDataset, Colors_ReferenceGame)
 import fileinput
+import time 
 
 #Run through list in the data folder?
 
@@ -39,10 +41,12 @@ class Engine(object):
         # parser.add_argument('--dir', type=int, help="directory of config file" default="data/data.json")
         parser.add_argument('--cuda', action='store_true', help='Enable cuda')
         args = parser.parse_args()
-        
+        self.time = 0
+
         args.cuda = args.cuda and torch.cuda.is_available()
         self.fd = args.full_diagnostic
         self.device = torch.device('cuda' if args.cuda else 'cpu')
+
         self.loss = None
         self.accuracy = None
         self.parsed = {}
@@ -102,18 +106,18 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
-        self.train_dataset = ColorDataset(split='Train', dis=self.distance)
+        self.train_dataset = Colors_ReferenceGame(split='Train', dis=self.distance)
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-
-        self.test_dataset = ColorDataset(vocab=self.vocab, split='Validation', dis=self.distance)
+        self.ref_dataset = ColorDataset(vocab=self.vocab, split='Test', dis=self.distance)
+        self.test_dataset = Colors_ReferenceGame(vocab=self.vocab, split='Validation', dis=self.distance)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
+        # self.sup_img = Supervised(self.sup_emb, self.bi)
         self.sup_img = Supervised(self.sup_emb, self.bi)
-        
         self.sup_emb = self.sup_emb.to(self.device)
         self.sup_img = self.sup_img.to(self.device)
         self.optimizer = torch.optim.Adam(
@@ -134,7 +138,8 @@ class Engine(object):
             self.load_best()
         self.final_loss()
         self.final_accuracy()
-
+        self.final_time()
+        self.final_perplexity()
              
         if (self.distance == 'close'):
             if (self.bi):
@@ -212,6 +217,7 @@ class Engine(object):
     def train(self):
         best_loss = float('inf')
         track_loss = np.zeros((self.epochs, 2))
+        t0 = time.time()
 
         for epoch in range(1, self.epochs + 1):
             t_loss = self.train_one_epoch(epoch)
@@ -232,7 +238,7 @@ class Engine(object):
                 'vocab_size': self.vocab_size,
             }, is_best, folder=self.out_dir)
             np.save(os.path.join(self.out_dir, 'loss.npy'), track_loss)
-            
+        self.time = time.time() - t0
     def train_one_epoch(self, epoch): 
         #train a single epoch 
 
@@ -283,31 +289,25 @@ class Engine(object):
             total_count = 0
             correct_count = 0
             correct = False
-
+            
             for batch_idx, (tgt_rgb, d1_rgb, d2_rgb, x_inp, x_len) in enumerate(ref_loader):
                 batch_size = x_inp.size(0)
-                tgt_rgb = tgt_rgb.float()
-                d1_rgb = d1_rgb.float()
-                d2_rgb = d2_rgb.float()
+                tgt_rgb = tgt_rgb.to(self.device).float()
+                d1_rgb = d1_rgb.to(self.device).float()
+                d2_rgb = d2_rgb.to(self.device).float()
 
-                pred_rgb = self.sup_img(x_inp, x_len)
+                pred_rgb = self.sup_img(tgt_rgb, x_inp, x_len)
                 pred_rgb = torch.sigmoid(pred_rgb)
+                
+                tgt_score = self.sup_img(tgt_rgb, x_inp, x_len)
+                d1_score = self.sup_img(d1_rgb, x_inp, x_len)
+                d2_score = self.sup_img(d2_rgb, x_inp, x_len)
+                soft = nn.Softmax(dim=1)
+                loss = soft(torch.cat([tgt_score,d1_score,d2_score],1))
+                softList = torch.argmax(loss, dim=1)
 
-                for i in range(batch_size):
-                    diff_tgt = torch.mean(torch.pow(pred_rgb[i] - tgt_rgb[i], 2))
-                    diff_d1 = torch.mean(torch.pow(pred_rgb[i] - d1_rgb[i], 2))
-                    diff_d2 = torch.mean(torch.pow(pred_rgb[i] - d2_rgb[i], 2))
-                    total_count += 1
-                    if diff_tgt.item() < diff_d1.item() and diff_tgt.item() < diff_d2.item():
-                        correct_count += 1
-                    else:
-                        if x_len[i].item() == 3:
-                            given_text = get_text(self.vocab['i2w'], np.array(x_inp[i]), x_len[i].item())
-                            pred_RGB = (pred_rgb[i] * 255.0).long().tolist()
-                            # print()
-                            # print('{0} matches with text: {1}'.format(pred_RGB, given_text))
-                            # print('{}, {}, {}'.format(tgt_rgb[i] * 255, d1_rgb[i] * 255, d2_rgb[i] * 255))
-                            # print('{}, {}, {}'.format(diff_tgt, diff_d1, diff_d2))
+                correct_count += torch.sum(softList == 0).item()
+                total_count += softList.size(0)
                 
 
             accuracy = correct_count / float(total_count) * 100
@@ -320,30 +320,97 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = ColorDataset(vocab=self.vocab, split='Test',dis=self.distance)
+        test_dataset = Colors_ReferenceGame(vocab=self.vocab, split='Test',dis=self.distance)
         test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():
             loss_meter = AverageMeter()
 
-            for batch_idx, (y_rgb, x_inp, x_len) in enumerate(test_loader):
+            for batch_idx, (tgt_rgb, d1_rgb, d2_rgb, x_inp, x_len) in enumerate(test_loader):
                 batch_size = x_inp.size(0)
-                y_rgb = y_rgb.float()
+                tgt_rgb = tgt_rgb.to(self.device).float()
+                d1_rgb = d1_rgb.to(self.device).float()
+                d2_rgb = d2_rgb.to(self.device).float()
+                x_inp = x_inp.to(self.device)
+                x_len = x_len.to(self.device)
 
-                pred_rgb = self.sup_img(x_inp, x_len)
-                pred_rgb = torch.sigmoid(pred_rgb)
+                # obtain predicted rgb
+                tgt_score = self.sup_img(tgt_rgb, x_inp, x_len)
+                d1_score = self.sup_img(d1_rgb, x_inp, x_len)
+                d2_score = self.sup_img(d2_rgb, x_inp, x_len)
 
-                loss = torch.mean(torch.pow(pred_rgb - y_rgb, 2))
+                loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)))
                 self.loss = loss
                 given_text = get_text(self.vocab['i2w'], np.array(x_inp[0]), x_len[0].item())
-                pred_RGB = (pred_rgb[0] * 255.0).long().tolist()
-                if (self.fd):
-                    print(colored('{0} matches with text: {1}'.format(pred_RGB, given_text),'cyan'))
-
+             
                 loss_meter.update(loss.item(), batch_size)
             print(colored('====> Final Test Loss: {:.4f}'.format(loss_meter.avg),'cyan'))
             
         print(colored("==ending data (final loss)==", 'magenta'))
         print("")
+    def final_time(self):
+        print(colored("==begining data (final time)==", 'magenta'))
+        print(colored('====> Final Time: {:.4f}'.format(self.time),'cyan'))
+        print(colored("==ending data (final time)==", 'magenta'))
+        print("")
+    def final_perplexity(self):
+        corpus = ""
+        perp = 0
+        counter = 0
+
+        # for i in self.train_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+        # for i in self.ref_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+        # for i in self.test_dataset.get_textColor():
+        #     corpus = corpus + " " + i
+
+        # print(corpus)
+
+        model = self.unigram(self.train_dataset.get_textColor())
+        model1 = self.unigram(self.ref_dataset.get_textColor())
+        model2 = self.unigram(self.test_dataset.get_textColor())
+
+        for i in self.train_dataset.get_textColor():
+            if (self.perplexity(i, model) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model)
+        for i in self.ref_dataset.get_textColor():
+            if (self.perplexity(i, model1) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model1)
+        for i in self.test_dataset.get_textColor():
+            if (self.perplexity(i, model2) < 100):
+                counter = counter + 1
+                perp = perp + self.perplexity(i, model2)
+
+
+        print(colored("==begining data (final perplexity)==", 'magenta'))
+        print(colored('====> Final Average Perplexity: {:.4f}'.format(perp/counter),'cyan'))
+        print(colored("==ending data (final perplexity)==", 'magenta'))
+        print("")
+
+    def unigram(self, tokens):    
+        model = collections.defaultdict(lambda: 0.01)
+        for f in tokens:
+            try:
+                model[f] += 1
+            except KeyError:
+                model [f] = 0
+                continue
+        N = float(sum(model.values()))
+        for word in model:
+            model[word] = model[word]/N
+        return model
+    
+    def perplexity(self, testset, model):
+        testset = testset.split()
+        perplexity = 1
+        N = 0
+        for word in testset:
+            N += 1
+            perplexity = perplexity * (1/model[word])
+        perplexity = pow(perplexity, 1/float(N)) 
+        return perplexity
 
 color = Engine()
