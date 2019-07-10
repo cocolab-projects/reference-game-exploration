@@ -15,7 +15,7 @@ from torchvision.utils import save_image
 from ColorDataset import ColorDataset, Colors_ReferenceGame
 
 from utils import (AverageMeter, save_checkpoint)
-from ColorModel_Test import TextEmbedding, Supervised
+from ColorModel import TextEmbedding, Supervised
 
 
 

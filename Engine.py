@@ -14,7 +14,7 @@ from ColorTraining import test,train
 from colorama import init 
 from termcolor import colored 
 from utils import (AverageMeter, save_checkpoint,get_text)
-from ColorModel_Test import TextEmbedding, Supervised
+from ColorModel import TextEmbedding, Supervised
 import torch 
 import torch.nn as nn
 import torch.optim as optim
@@ -100,6 +100,9 @@ class Engine(object):
         self.filePath = self.modelDir['file_path']
 
         self.lr = self.trainDir['learning_rate']
+        self.num = self.trainDir['number']
+        self.width = self.trainDir['width']
+
         self.bs = self.trainDir['batch_size']
         self.epochs = self.trainDir['epochs']
         self.dim = self.trainDir['dim']
@@ -116,8 +119,7 @@ class Engine(object):
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
-        # self.sup_img = Supervised(self.sup_emb, self.bi)
-        self.sup_img = Supervised(self.sup_emb, self.bi)
+        self.sup_img = Supervised(self.sup_emb, self.bi,self.width,self.num)
         self.sup_emb = self.sup_emb.to(self.device)
         self.sup_img = self.sup_img.to(self.device)
         self.optimizer = torch.optim.Adam(
@@ -141,55 +143,66 @@ class Engine(object):
         self.final_time()
         self.final_perplexity()
              
-        if (self.distance == 'close'):
-            if (self.bi):
 
-                if path.exists('plot_data/' + 'plot_close_bi.txt'):    
-                    with open('plot_data/' + 'plot_close_bi.txt','a') as f:
-                        f.write('\n' + str(self.accuracy))
-                        f.flush()
-                else:
-                    completeName = os.path.join("plot_data", 'plot_close_bi.txt')         
-                    file1 = open(completeName, "w")
-                    file1.write(str(self.accuracy))
-                    file1.close()
+        if path.exists('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
+            with open('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
+                f.write('\n' + str(self.accuracy))
+                f.flush()
+        else:
+            completeName = os.path.join('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
+            file1 = open(completeName, "w")
+            file1.write(str(self.accuracy))
+            file1.close()
+        
+        # if (self.distance == 'close'):
+        #     if (self.bi):
 
-            else:
+        #         if path.exists('plot_data/' + 'plot_close_bi.txt'):    
+        #             with open('plot_data/' + 'plot_close_bi.txt','a') as f:
+        #                 f.write('\n' + str(self.accuracy))
+        #                 f.flush()
+        #         else:
+        #             completeName = os.path.join("plot_data", 'plot_close_bi.txt')         
+        #             file1 = open(completeName, "w")
+        #             file1.write(str(self.accuracy))
+        #             file1.close()
+
+        #     else:
             
-                if path.exists('plot_data/' + 'plot_close_nonbi.txt'):    
-                    with open('plot_data/' + 'plot_close_nonbi.txt','a') as f:
-                        f.write('\n' + str(self.accuracy))
-                        f.flush()
-                else:
-                    completeName = os.path.join("plot_data", 'plot_close_nonbi.txt')         
-                    file1 = open(completeName, "w")
-                    file1.write(str(self.accuracy))
-                    file1.close()
+        #         if path.exists('plot_data/' + 'plot_close_nonbi.txt'):    
+        #             with open('plot_data/' + 'plot_close_nonbi.txt','a') as f:
+        #                 f.write('\n' + str(self.accuracy))
+        #                 f.flush()
+        #         else:
+        #             completeName = os.path.join("plot_data", 'plot_close_nonbi.txt')         
+        #             file1 = open(completeName, "w")
+        #             file1.write(str(self.accuracy))
+        #             file1.close()
 
-        elif (self.distance == 'far'):
-            if (self.bi):
+        # elif (self.distance == 'far'):
+        #     if (self.bi):
 
-                if path.exists('plot_data/' + 'plot_far_bi.txt'):    
-                    with open('plot_data/' + 'plot_far_bi.txt','a') as f:
-                        f.write('\n' + str(self.accuracy))
-                        f.flush()
-                else:
-                    completeName = os.path.join("plot_data", 'plot_far_bi.txt')         
-                    file1 = open(completeName, "w")
-                    file1.write(str(self.accuracy))
-                    file1.close()
+        #         if path.exists('plot_data/' + 'plot_far_bi.txt'):    
+        #             with open('plot_data/' + 'plot_far_bi.txt','a') as f:
+        #                 f.write('\n' + str(self.accuracy))
+        #                 f.flush()
+        #         else:
+        #             completeName = os.path.join("plot_data", 'plot_far_bi.txt')         
+        #             file1 = open(completeName, "w")
+        #             file1.write(str(self.accuracy))
+        #             file1.close()
 
-            else:
+        #     else:
             
-                if path.exists('plot_data/' + 'plot_far_nonbi.txt'):    
-                    with open('plot_data/' + 'plot_far_nonbi.txt','a') as f:
-                        f.write('\n' + str(self.accuracy))
-                        f.flush()
-                else:
-                    completeName = os.path.join("plot_data", 'plot_far_nonbi.txt')         
-                    file1 = open(completeName, "w")
-                    file1.write(str(self.accuracy))
-                    file1.close()
+        #         if path.exists('plot_data/' + 'plot_far_nonbi.txt'):    
+        #             with open('plot_data/' + 'plot_far_nonbi.txt','a') as f:
+        #                 f.write('\n' + str(self.accuracy))
+        #                 f.flush()
+        #         else:
+        #             completeName = os.path.join("plot_data", 'plot_far_nonbi.txt')         
+        #             file1 = open(completeName, "w")
+        #             file1.write(str(self.accuracy))
+        #             file1.close()
 
         # ref_dataset = Colors_ReferenceGame(self.vocab, split='Test',dis=self.distance)
         # l3 = [x for x in ref_dataset.vocab if x not in self.train_dataset.vocab]
