@@ -12,10 +12,10 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-from ColorDataset import ColorDataset, Colors_ReferenceGame
+from ChairDataset import ChairDataset, Chairs_ReferenceGame
 
 from utils import (AverageMeter, save_checkpoint)
-from ColorModel import TextEmbedding, Supervised
+from ChairModel import TextEmbedding, Supervised
 
 
 
@@ -48,13 +48,13 @@ if __name__ == '__main__':
     device = torch.device('cuda' if args.cuda else 'cpu')
 
     # data_dir = get_data_dir(args.dataset)
-    train_dataset = Colors_ReferenceGame(split='Train')
+    train_dataset = Chairs_ReferenceGame(split='Train')
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size)
     N_mini_batches = len(train_loader)
     vocab_size = train_dataset.vocab_size
     vocab = train_dataset.vocab
 
-    test_dataset = Colors_ReferenceGame(vocab=vocab, split='Validation')
+    test_dataset = Chairs_ReferenceGame(vocab=vocab, split='Validation')
     test_loader = DataLoader(test_dataset, shuffle=False, batch_size=args.batch_size)
 
     sup_emb = TextEmbedding(vocab_size)
@@ -83,10 +83,12 @@ def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
         x_inp = x_inp.to(device)
         x_len = x_len.to(device)
 
+        # obtain predicted rgb
         tgt_score = sup_img(tgt_rgb, x_inp, x_len)
         d1_score = sup_img(d1_rgb, x_inp, x_len)
         d2_score = sup_img(d2_rgb, x_inp, x_len)
 
+        # loss between actual and predicted rgb: Mean Squared Loss !!
         loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)))
         
 
@@ -121,6 +123,7 @@ def test(epoch, sup_emb, sup_img, test_loader,device,optimizer):
             x_inp = x_inp.to(device)
             x_len = x_len.to(device)
 
+            # obtain predicted rgb
             tgt_score = sup_img(tgt_rgb, x_inp, x_len)
             d1_score = sup_img(d1_rgb, x_inp, x_len)
             d2_score = sup_img(d2_rgb, x_inp, x_len)

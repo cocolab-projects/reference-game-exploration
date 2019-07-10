@@ -23,7 +23,8 @@ SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
 PAD_TOKEN = '<pad>'
 UNK_TOKEN = '<unk>'
-
+TRAINING_PERCENTAGE = 64 / 100
+TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
 MAX_LEN = 10
 def load_char_id_to_utterance_map(context_condition='all'):
@@ -42,7 +43,7 @@ def load_char_id_to_utterance_map(context_condition='all'):
     return chair_id, text
 
 class ChairsDataset(data.Dataset):
-    def __init__(self, vocab=None, train=True, context_condition='all', 
+    def __init__(self, vocab=None, split='Train', context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None):
         super(Chairs2k_ReferenceGame, self).__init__()
         assert split_mode in ['easy', 'hard']
@@ -56,7 +57,7 @@ class ChairsDataset(data.Dataset):
         self.names  = chair_list
         self.context_condition = context_condition
         self.split_mode = split_mode
-        self.train = train
+        self.split = split
        
         print('loading CSV')
         csv_path = os.path.join(RAW_DIR, 'chairs2k_group_data.csv')
@@ -76,7 +77,7 @@ class ChairsDataset(data.Dataset):
         print(data)
 
         if self.split_mode == 'easy':
-            print(data)
+            # print(data)
             # for each unique chair, divide all rows containing it into
             # training and test sets
             target_names = data[:, 3]
@@ -87,10 +88,15 @@ class ChairsDataset(data.Dataset):
             for target in target_uniqs:
                 data_i = data[target_names == target]
                 n_train = int(0.8 * len(data_i))
-                if self.train:
-                    new_data.append(data_i[:n_train])
+                train_len = int(TRAINING_PERCENTAGE * len(data_i))
+                test_len = int(TESTING_PERCENTAGE * len(data_i))
+
+                if self.split = 'Train':
+                    new_data.append(data_i[:train_len])
+                elif self.split = 'Validate':
+                    new_data.append(data_i[train_len:-test_len])
                 else:
-                    new_data.append(data_i[n_train:])
+                    new_data.append(data_i[test_len:])
                 pbar.update()
             pbar.close()
             new_data = np.concatenate(new_data, axis=0)
@@ -100,11 +106,18 @@ class ChairsDataset(data.Dataset):
             # for all chairs, divide into train and test sets
             target_names = data[:, 3]
             target_uniqs = np.unique(target_names)
-            n_train = len(0.8 * len(target_uniqs))
+            train_len = len(TRAINING_PERCENTAGE * len(target_uniqs))
+            test_len = len(TESTING_PERCENTAGE * len(target_uniqs))
+
             print('splitting data into train and test')
-            splitter = (np.in1d(target_names, target_uniqs[:n_train])
-                        if self.train else
-                        np.in1d(target_names, target_uniqs[n_train:]))
+            splitter = (
+                if self.split = 'Train':  
+                    np.in1d(target_names, target_uniqs[:train_len])
+                elif self.split = 'Validate':  
+                    np.in1d(target_names, target_uniqs[train_len:-test_len])
+                else:
+                    np.in1d(target_names, target_uniqs[test_len:])
+            )
             data = data[splitter]
 
         # replace target_chair with a label

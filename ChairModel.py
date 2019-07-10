@@ -19,33 +19,19 @@ class TextEmbedding(nn.Module):
     
     def forward(self, x):
         return self.embedding(x)
-
-class Supervised(nn.Module):
-    """
-    x: text, y: image, z: latent
-    Model p(z|x,y)
-    @Param embedding_module: nn.Embedding
-                             pass the embedding module (share with decoder)
-    @Param z_dim: number of latent dimensions
-    @Param hidden_dim: integer [default: 256]
-                       number of hidden nodes in GRU
-    """
-    def __init__(self, embedding_module, bi, width, number, img_dim=100):
-        super(Supervised, self).__init__()
-
-        self.img_dim = img_dim
-        self.embedding = embedding_module
-        self.embedding_dim = embedding_module.embedding.embedding_dim
-
-        self.hidden_dim = 256
-
-        self.gru = nn.GRU(self.embedding_dim, self.hidden_dim, batch_first=True, bidirectional=bi)
-        self.txt_lin = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
-        self.img_seq = nn.Sequential(nn.Linear(self.img_dim, self.hidden_dim), \
-                                        nn.ReLU(),  \
-                                        nn.Linear(self.hidden_dim, self.hidden_dim // 2))
-        self.sequential = None
-        self.hidden = []
+class ChairModel(nn.Module):
+    def __init__(self, channels, img_size, hidden_dim, n_filters=64, width, bi, number):
+        super(ChairModel, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(channels, n_filters, 2, 2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(n_filters, n_filters * 2, 2, 2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(n_filters * 2, n_filters * 4, 2, 2, padding=0))
+        cout = gen_32_conv_output_dim(img_size)
+        self.fc = nn.Linear(n_filters * 4 * cout**2, hidden_dim)
+        self.cout = cout
+        self.n_filters = n_filters
         self.number = number
         if (number == 1):
             if (width=='Skinny'):
@@ -112,47 +98,26 @@ class Supervised(nn.Module):
                                 nn.Linear(self.hidden_dim // 8, 1))        
 
 
-    def forward(self, img, seq, length):
-        batch_size = seq.size(0)
 
-        if batch_size > 1:
-            sorted_lengths, sorted_idx = torch.sort(length, descending=True)
-            seq = seq[sorted_idx]
+    def forward(self, img):
+        batch_size = img.size(0)
+        out = self.conv(img)
+        out = out.view(batch_size, self.n_filters * 4 * self.cout**2)
+        hidden = self.fc(out)
+        return hidden
 
-        # embed sequences
-        embed_seq = self.embedding(seq)
+def gen_32_conv_output_dim(s):
+    s = get_conv_output_dim(s, 2, 0, 2)
+    s = get_conv_output_dim(s, 2, 0, 2)
+    s = get_conv_output_dim(s, 2, 0, 2)
+    return s
 
-        # pack padded sequences
-        packed = rnn_utils.pack_padded_sequence(
-            embed_seq,
-            sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
 
-        # forward RNN
-        # rgb_hidden2 = self.rgb_seq(rgb)
-
-        # sequential = nn.Sequential(nn.Linear(256, 256, 256), \
-        #                 nn.ReLU(),  \
-        #                 nn.Linear(2, 100, 256))
-        
-        # sequential(rgb_hidden2)
-        _, hidden = self.gru(packed)
-        hidden = hidden[-1, ...]
-        
-        if batch_size > 1:
-            _, reversed_idx = torch.sort(sorted_idx)
-            hidden = hidden[reversed_idx]
-        # print(hidden)
-        txt_hidden = self.txt_lin(hidden)
-        img_hidden = self.img_seq(img)
-
-        concat = torch.cat((txt_hidden, img_hidden), 1)
-        # for layer in self.hidden:
-        #     concat = F.relu(layer(concat))
-
- 
-
-        # print("Hi")
-        # print (self.sequential(concat))
-        # print (self.sequential(self.sequential(concat)))
-
-        return self.sequential(concat)
+def get_conv_output_dim(I, K, P, S):
+    # I = input height/length
+    # K = filter size
+    # P = padding
+    # S = stride
+    # O = output height/length
+    O = (I - K + 2*P)/float(S) + 1
+    return int(O)
