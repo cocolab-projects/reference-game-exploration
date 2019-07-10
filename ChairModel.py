@@ -20,8 +20,19 @@ class TextEmbedding(nn.Module):
     def forward(self, x):
         return self.embedding(x)
 class ChairModel(nn.Module):
-    def __init__(self, channels, img_size, hidden_dim, n_filters=64, width, bi, number):
+    def __init__(self, channels, embedding_module, img_size, hidden_dim, n_filters=64, width, bi, number):
         super(ChairModel, self).__init__()
+        self.embedding = embedding_module
+        self.embedding_dim = embedding_module.embedding.embedding_dim
+
+        self.hidden_dim = 256
+
+        self.gru = nn.GRU(self.embedding_dim, self.hidden_dim, batch_first=True, bidirectional=bi)
+        self.txt_lin = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
+        self.rgb_seq = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
+                                        nn.ReLU(),  \
+                                        nn.Linear(self.hidden_dim, self.hidden_dim // 2))
+
         self.conv = nn.Sequential(
             nn.Conv2d(channels, n_filters, 2, 2, padding=0),
             nn.ReLU(),
@@ -99,12 +110,40 @@ class ChairModel(nn.Module):
 
 
 
-    def forward(self, img):
+    def forward(self, img, seq, length):
         batch_size = img.size(0)
         out = self.conv(img)
         out = out.view(batch_size, self.n_filters * 4 * self.cout**2)
-        hidden = self.fc(out)
-        return hidden
+        hidden_img = self.fc(out)
+
+        batch_size = seq.size(0)
+
+        if batch_size > 1:
+            sorted_lengths, sorted_idx = torch.sort(length, descending=True)
+            seq = seq[sorted_idx]
+
+        # embed sequences
+        embed_seq = self.embedding(seq)
+
+        # pack padded sequences
+        packed = rnn_utils.pack_padded_sequence(
+            embed_seq,
+            sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
+
+        _, hidden = self.gru(packed)
+        hidden = hidden[-1, ...]
+        
+        if batch_size > 1:
+            _, reversed_idx = torch.sort(sorted_idx)
+            hidden = hidden[reversed_idx]
+        # print(hidden)
+        txt_hidden = self.txt_lin(hidden)
+
+        concat = torch.cat((txt_hidden, hidden_img), 1)
+        # for layer in self.hidden:
+        #     concat = F.relu(layer(concat))
+
+        return self.sequential(concat)
 
 def gen_32_conv_output_dim(s):
     s = get_conv_output_dim(s, 2, 0, 2)
