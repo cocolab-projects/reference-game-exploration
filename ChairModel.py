@@ -19,9 +19,9 @@ class TextEmbedding(nn.Module):
     
     def forward(self, x):
         return self.embedding(x)
-class ChairModel(nn.Module):
-    def __init__(self, channels, embedding_module, img_size, hidden_dim, n_filters=64, width, bi, number):
-        super(ChairModel, self).__init__()
+class Supervised(nn.Module):
+    def __init__(self, embedding_module, bi, width, number, n_filters=64, img_size=32, channels=3):
+        super(Supervised, self).__init__()
         self.embedding = embedding_module
         self.embedding_dim = embedding_module.embedding.embedding_dim
 
@@ -29,9 +29,6 @@ class ChairModel(nn.Module):
 
         self.gru = nn.GRU(self.embedding_dim, self.hidden_dim, batch_first=True, bidirectional=bi)
         self.txt_lin = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
-        self.rgb_seq = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
-                                        nn.ReLU(),  \
-                                        nn.Linear(self.hidden_dim, self.hidden_dim // 2))
 
         self.conv = nn.Sequential(
             nn.Conv2d(channels, n_filters, 2, 2, padding=0),
@@ -40,7 +37,7 @@ class ChairModel(nn.Module):
             nn.ReLU(),
             nn.Conv2d(n_filters * 2, n_filters * 4, 2, 2, padding=0))
         cout = gen_32_conv_output_dim(img_size)
-        self.fc = nn.Linear(n_filters * 4 * cout**2, hidden_dim)
+        self.fc = nn.Linear(n_filters * 4 * cout**2, self.hidden_dim)
         self.cout = cout
         self.n_filters = n_filters
         self.number = number
@@ -112,10 +109,15 @@ class ChairModel(nn.Module):
 
     def forward(self, img, seq, length):
         batch_size = img.size(0)
+        #print(batch_size)
+        #print(img)
+
         out = self.conv(img)
         out = out.view(batch_size, self.n_filters * 4 * self.cout**2)
-        hidden_img = self.fc(out)
+        #print(out)
 
+        hidden_img = self.fc(out)
+        hidden_img = self.txt_lin(hidden_img)
         batch_size = seq.size(0)
 
         if batch_size > 1:
@@ -124,12 +126,10 @@ class ChairModel(nn.Module):
 
         # embed sequences
         embed_seq = self.embedding(seq)
-
         # pack padded sequences
         packed = rnn_utils.pack_padded_sequence(
             embed_seq,
             sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
-
         _, hidden = self.gru(packed)
         hidden = hidden[-1, ...]
         

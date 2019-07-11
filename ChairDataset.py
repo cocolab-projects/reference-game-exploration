@@ -42,10 +42,10 @@ def load_char_id_to_utterance_map(context_condition='all'):
 
     return chair_id, text
 
-class ChairsDataset(data.Dataset):
+class ChairDataset(data.Dataset):
     def __init__(self, vocab=None, split='Train', context_condition='all', 
-                 split_mode='easy', image_size=32, image_transform=None):
-        super(Chairs2k_ReferenceGame, self).__init__()
+                 split_mode='easy', image_size=32, image_transform=None, dataVal=None):
+        super(ChairDataset, self).__init__()
         assert split_mode in ['easy', 'hard']
 
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
@@ -71,10 +71,10 @@ class ChairsDataset(data.Dataset):
         df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
         df = df.dropna()
         data = np.asarray(df)
-        print(data)
+        # print(data)
         # make sure rows reference existing images
         data = self.clean_data(data, self.names)
-        print(data)
+        # print(data)
 
         if self.split_mode == 'easy':
             # print(data)
@@ -91,9 +91,9 @@ class ChairsDataset(data.Dataset):
                 train_len = int(TRAINING_PERCENTAGE * len(data_i))
                 test_len = int(TESTING_PERCENTAGE * len(data_i))
 
-                if self.split = 'Train':
+                if (self.split == 'Train'):
                     new_data.append(data_i[:train_len])
-                elif self.split = 'Validate':
+                elif (self.split == 'Validate'):
                     new_data.append(data_i[train_len:-test_len])
                 else:
                     new_data.append(data_i[test_len:])
@@ -110,14 +110,12 @@ class ChairsDataset(data.Dataset):
             test_len = len(TESTING_PERCENTAGE * len(target_uniqs))
 
             print('splitting data into train and test')
-            splitter = (
-                if self.split = 'Train':  
-                    np.in1d(target_names, target_uniqs[:train_len])
-                elif self.split = 'Validate':  
-                    np.in1d(target_names, target_uniqs[train_len:-test_len])
-                else:
-                    np.in1d(target_names, target_uniqs[test_len:])
-            )
+            if (self.split == 'Train'):  
+                splitter = np.in1d(target_names, target_uniqs[:train_len])
+            elif (self.split == 'Validate'):  
+                splitter = np.in1d(target_names, target_uniqs[train_len:-test_len])
+            else:
+                splitter = np.in1d(target_names, target_uniqs[test_len:])
             data = data[splitter]
 
         # replace target_chair with a label
@@ -162,7 +160,7 @@ class ChairsDataset(data.Dataset):
 
         self.image_transform = image_transform
 
-        print(self.vocab)
+        # print(self.vocab)
 
     def build_vocab(self, texts):
         w2c = defaultdict(int)
@@ -262,10 +260,10 @@ class ChairsDataset(data.Dataset):
 
         return targets, inputs, length
 
-class Chairs2k_ReferenceGame(data.Dataset):
-    def __init__(self, vocab=None, train=True, context_condition='all', 
-                 split_mode='easy', image_size=32, image_transform=None):
-        super(Chairs2k_ReferenceGame, self).__init__()
+class Chairs_ReferenceGame(data.Dataset):
+    def __init__(self, vocab=None, split='Train', train=True, context_condition='all', 
+                 split_mode='easy', image_size=32, image_transform=None, dataVal=None):
+        super(Chairs_ReferenceGame, self).__init__()
         assert split_mode in ['easy', 'hard']
 
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
@@ -278,7 +276,7 @@ class Chairs2k_ReferenceGame(data.Dataset):
         self.context_condition = context_condition
         self.split_mode = split_mode
         self.train = train
-       
+        self.split = split
         print('loading CSV')
         csv_path = os.path.join(RAW_DIR, 'chairs2k_group_data.csv')
         df = pd.read_csv(csv_path)
@@ -291,43 +289,56 @@ class Chairs2k_ReferenceGame(data.Dataset):
         df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
         df = df.dropna()
         data = np.asarray(df)
-        print(data)
+        # print(data)
         # make sure rows reference existing images
         data = self.clean_data(data, self.names)
-        print(data)
 
-        if self.split_mode == 'easy':
-            print(data)
-            # for each unique chair, divide all rows containing it into
-            # training and test sets
-            target_names = data[:, 3]
-            target_uniqs = np.unique(target_names)
-            new_data = []
-            print('splitting data into train and test')
-            pbar = tqdm(total=len(target_uniqs))
-            for target in target_uniqs:
-                data_i = data[target_names == target]
-                n_train = int(0.8 * len(data_i))
-                if self.train:
-                    new_data.append(data_i[:n_train])
+        if (dataVal is None):
+            # print(data)
+            if self.split_mode == 'easy':
+                # print(data)
+                # for each unique chair, divide all rows containing it into
+                # training and test sets
+                target_names = data[:, 3]
+                target_uniqs = np.unique(target_names)
+                new_data = []
+                print('splitting data into train and test')
+                pbar = tqdm(total=len(target_uniqs))
+                for target in target_uniqs:
+                    data_i = data[target_names == target]
+                    n_train = int(0.8 * len(data_i))
+                    train_len = int(TRAINING_PERCENTAGE * len(data_i))
+                    test_len = int(TESTING_PERCENTAGE * len(data_i))
+
+                    if (self.split == 'Train'):
+                        new_data.append(data_i[:train_len])
+                    elif (self.split == 'Validate'):
+                        new_data.append(data_i[train_len:-test_len])
+                    else:
+                        new_data.append(data_i[test_len:])
+                    pbar.update()
+                pbar.close()
+                new_data = np.concatenate(new_data, axis=0)
+                # overwrite data variable
+                data = new_data
+            else:  # split_mode == 'hard'
+                # for all chairs, divide into train and test sets
+                target_names = data[:, 3]
+                target_uniqs = np.unique(target_names)
+                train_len = len(TRAINING_PERCENTAGE * len(target_uniqs))
+                test_len = len(TESTING_PERCENTAGE * len(target_uniqs))
+
+                print('splitting data into train and test')
+                if (self.split == 'Train'):  
+                    splitter = np.in1d(target_names, target_uniqs[:train_len])
+                elif (self.split == 'Validate'):  
+                    splitter = np.in1d(target_names, target_uniqs[train_len:-test_len])
                 else:
-                    new_data.append(data_i[n_train:])
-                pbar.update()
-            pbar.close()
-            new_data = np.concatenate(new_data, axis=0)
-            # overwrite data variable
-            data = new_data
-        else:  # split_mode == 'hard'
-            # for all chairs, divide into train and test sets
-            target_names = data[:, 3]
-            target_uniqs = np.unique(target_names)
-            n_train = len(0.8 * len(target_uniqs))
-            print('splitting data into train and test')
-            splitter = (np.in1d(target_names, target_uniqs[:n_train])
-                        if self.train else
-                        np.in1d(target_names, target_uniqs[n_train:]))
-            data = data[splitter]
-
+                    splitter = np.in1d(target_names, target_uniqs[test_len:])
+                data = data[splitter]
+            self.data = data
+        else:
+            self.data = dataVal
         # replace target_chair with a label
         labels = []
         for i in range(len(data)):
@@ -370,7 +381,7 @@ class Chairs2k_ReferenceGame(data.Dataset):
 
         self.image_transform = image_transform
 
-        print(self.vocab)
+        # print(self.vocab)
 
     def build_vocab(self, texts):
         w2c = defaultdict(int)
@@ -468,8 +479,12 @@ class Chairs2k_ReferenceGame(data.Dataset):
         chair_b = chair_b + '.png'
         chair_c = chair_c + '.png'
         # chair_target = chair_target + '.png'
+        chair_a_pre = chair_a
+        chair_b_pre = chair_b
+        chair_c_pre = chair_c
 
         chair_names = list(self.names)
+        breakpoint()
         index_a = chair_names.index(chair_a)
         index_b = chair_names.index(chair_b)
         index_c = chair_names.index(chair_c)
@@ -500,8 +515,20 @@ class Chairs2k_ReferenceGame(data.Dataset):
 
         inputs = torch.from_numpy(inputs).long()
         targets = torch.from_numpy(targets).long()
+        trans = transforms.ToTensor()
 
-        return chair_a, chair_b, chair_c, targets, inputs, length, label
+        if (label == 2):
+            temp = chair_a
+            temp1 = chair_b
+            chair_a = temp1
+            chair_b = temp
+        elif (label == 3):
+            temp = chair_a
+            temp1 = chair_c
+            chair_a = temp1
+            chair_c = temp
+
+        return trans(chair_a), trans(chair_b), trans(chair_c), inputs, length
 
 def preprocess_text(text):
     text = text.lower() 

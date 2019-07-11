@@ -10,18 +10,18 @@ from tqdm import tqdm
 from itertools import chain
 import matplotlib.pyplot as plt
 import json
-from ColorTraining import test,train
+from ChairTraining import test,train
 from colorama import init 
 from termcolor import colored 
 from utils import (AverageMeter, save_checkpoint,get_text)
-from ColorModel import TextEmbedding, Supervised
+from ChairModel import TextEmbedding, Supervised
 import torch 
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-from ColorDataset import (ColorDataset, Colors_ReferenceGame)
+from ChairDataset import (ChairDataset,Chairs_ReferenceGame)
 import fileinput
 import time 
 
@@ -109,13 +109,14 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
-        self.train_dataset = Colors_ReferenceGame(split='Train', dis=self.distance)
+        self.train_dataset = Chairs_ReferenceGame(split='Train')
+        self.data = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-        self.ref_dataset = ColorDataset(vocab=self.vocab, split='Test', dis=self.distance)
-        self.test_dataset = Colors_ReferenceGame(vocab=self.vocab, split='Validation', dis=self.distance)
+        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data)
+        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
@@ -141,7 +142,7 @@ class Engine(object):
         self.final_loss()
         self.final_accuracy()
         self.final_time()
-        self.final_perplexity()
+        # self.final_perplexity()
              
 
         if path.exists('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
@@ -294,7 +295,7 @@ class Engine(object):
         return epoch
         
     def final_accuracy(self):
-        ref_dataset = Colors_ReferenceGame(self.vocab, split='Test',dis=self.distance)
+        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data)
         ref_loader = DataLoader(ref_dataset, shuffle=False, batch_size=self.bs)
         N_mini_batches = len(ref_loader)
         with torch.no_grad():
@@ -308,9 +309,6 @@ class Engine(object):
                 tgt_rgb = tgt_rgb.to(self.device).float()
                 d1_rgb = d1_rgb.to(self.device).float()
                 d2_rgb = d2_rgb.to(self.device).float()
-
-                pred_rgb = self.sup_img(tgt_rgb, x_inp, x_len)
-                pred_rgb = torch.sigmoid(pred_rgb)
                 
                 tgt_score = self.sup_img(tgt_rgb, x_inp, x_len)
                 d1_score = self.sup_img(d1_rgb, x_inp, x_len)
@@ -333,7 +331,7 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = Colors_ReferenceGame(vocab=self.vocab, split='Test',dis=self.distance)
+        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data)
         test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():
