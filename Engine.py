@@ -73,7 +73,7 @@ class Engine(object):
         self.seed = self.parsed['seed']
 
         
-        if path.exists(DIR+ 'seeds_save/' + 'seed.txt'):
+        if not path.exists(DIR+ 'seeds_save/' + 'seed.txt'):
             seedNew = random.randint(1,1000001)
             self.seed = seedNew 
             # val.write(str(val.read()) + "\n" + str(seedNew))
