@@ -17,7 +17,7 @@ from collections import defaultdict
 
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, 'data')
-NUMPY_DIR = 'chairs_img_npy/numpy/numpy/'
+NUMPY_DIR = '../mnt/fs5/rona03/chairs_img_npy/numpy/numpy/'
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'

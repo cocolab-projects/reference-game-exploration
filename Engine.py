@@ -25,6 +25,8 @@ from ChairDataset import (ChairDataset,Chairs_ReferenceGame)
 import fileinput
 import time 
 
+
+DIR = '../mnt/fs5/rona03/'
 #Run through list in the data folder?
 
 class Engine(object):
@@ -71,16 +73,16 @@ class Engine(object):
         self.seed = self.parsed['seed']
 
         
-        if path.exists('seeds_save/' + 'seed.txt'):
+        if path.exists(DIR+ 'seeds_save/' + 'seed.txt'):
             seedNew = random.randint(1,1000001)
             self.seed = seedNew 
             # val.write(str(val.read()) + "\n" + str(seedNew))
             
-            with open('seeds_save/' + 'seed.txt','a') as f:
+            with open(DIR+ 'seeds_save/' + 'seed.txt','a') as f:
                 f.write('\n' + str(self.seed))
                 f.flush()
         else:
-            completeName = os.path.join("seeds_save", 'seed.txt')         
+            completeName = os.path.join(DIR+ "seeds_save", 'seed.txt')         
             file1 = open(completeName, "w")
             file1.write(str(self.seed))
             file1.close()
@@ -145,12 +147,12 @@ class Engine(object):
         # self.final_perplexity()
              
 
-        if path.exists('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
-            with open('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
+        if path.exists(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
+            with open(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
                 f.write('\n' + str(self.accuracy))
                 f.flush()
         else:
-            completeName = os.path.join('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
+            completeName = os.path.join(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
             file1 = open(completeName, "w")
             file1.write(str(self.accuracy))
             file1.close()
@@ -251,7 +253,7 @@ class Engine(object):
                 'vocab': self.vocab,
                 'vocab_size': self.vocab_size,
             }, is_best, folder=self.out_dir)
-            np.save(os.path.join(self.out_dir, 'loss.npy'), track_loss)
+            np.save(os.path.join(DIR+self.out_dir, 'loss.npy'), track_loss)
         self.time = time.time() - t0
     def train_one_epoch(self, epoch): 
         #train a single epoch 
@@ -264,7 +266,7 @@ class Engine(object):
         test_loss = test(epoch,self.sup_emb,self.sup_img,self.test_loader,self.device,self.optimizer)
         return test_loss
 
-    def load_model(self,folder='./color_data/', filename='checkpoint.pth.tar'):
+    def load_model(self,folder=DIR+'color_data/', filename='checkpoint.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         track_loss = checkpoint['track_loss']
@@ -284,7 +286,7 @@ class Engine(object):
         print(" ")
         return epoch, track_loss, sup_emb, sup_img, vocab, vocab_size
 
-    def load_best(self, folder='./color_data/', filename='model_best.pth.tar'):
+    def load_best(self, folder=DIR+'color_data/', filename='model_best.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         
