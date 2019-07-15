@@ -145,12 +145,12 @@ class Engine(object):
         # self.final_perplexity()
              
 
-        if path.exists('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
-            with open('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
+        if path.exists('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
+            with open('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
                 f.write('\n' + str(self.accuracy))
                 f.flush()
         else:
-            completeName = os.path.join('plot_data/Rework_Sup/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
+            completeName = os.path.join('plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
             file1 = open(completeName, "w")
             file1.write(str(self.accuracy))
             file1.close()

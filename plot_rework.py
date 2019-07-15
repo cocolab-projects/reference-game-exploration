@@ -17,7 +17,7 @@ skinny_threeList = np.array([])
 objects = ('F-1','F-2','F-3','M-1','M-2','M-3','S-1','S-2','S-3',)
 y_pos = np.arange(len(objects))
 
-file = open('plot_data/Rework_Sup/plot_far_False_Fat_1.txt', 'r') 
+file = open('plot_data/plot_far_False_Fat_1.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -28,7 +28,7 @@ fat_one = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Fat_2.txt', 'r') 
+file = open('plot_data/plot_far_False_Fat_2.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -40,7 +40,7 @@ fat_two = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Fat_3.txt', 'r') 
+file = open('plot_data/plot_far_False_Fat_3.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -56,7 +56,7 @@ fat_three = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Medium_1.txt', 'r') 
+file = open('plot_data/plot_far_False_Medium_1.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -67,7 +67,7 @@ medium_one = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Medium_2.txt', 'r') 
+file = open('plot_data/plot_far_False_Medium_2.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -79,7 +79,7 @@ medium_two = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Medium_3.txt', 'r') 
+file = open('plot_data/plot_far_False_Medium_3.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -95,7 +95,7 @@ medium_three = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Skinny_1.txt', 'r') 
+file = open('plot_data/plot_far_False_Skinny_1.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -106,7 +106,7 @@ skinny_one = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Skinny_2.txt', 'r') 
+file = open('plot_data/plot_far_False_Skinny_2.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -118,7 +118,7 @@ skinny_two = counter/counterLine
 counter = 0
 counterLine = 0
 
-file = open('plot_data/Rework_Sup/plot_far_False_Skinny_3.txt', 'r') 
+file = open('plot_data/plot_far_False_Skinny_3.txt', 'r') 
 for line in file: 
     counter = counter + float(line)
     counterLine += 1
@@ -203,5 +203,5 @@ plt.xticks(y_pos, objects)
 plt.ylabel('Accurcy')
 plt.title('Far/Non-Bi')
 plt.ylim(low - abs(best-low),best + abs(best-low))
-plt.savefig('plot_data_png/Rework_Sup/rework-far-nonbi.png')
+plt.savefig('plot_data_png/rework-far-nonbi.png')
 plt.show()
