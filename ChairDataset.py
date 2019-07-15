@@ -267,6 +267,8 @@ class Chairs_ReferenceGame(data.Dataset):
         assert split_mode in ['easy', 'hard']
 
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
+        for i in self.names:
+            print(i)
         self.images = np.load(os.path.join(NUMPY_DIR, 'images.npy'))
         chair_list = []
         for i in self.names:
@@ -484,7 +486,6 @@ class Chairs_ReferenceGame(data.Dataset):
         chair_c_pre = chair_c
 
         chair_names = list(self.names)
-        breakpoint()
         index_a = chair_names.index(chair_a)
         index_b = chair_names.index(chair_b)
         index_c = chair_names.index(chair_c)
