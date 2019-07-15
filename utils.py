@@ -7,6 +7,15 @@ import torch
 import shutil
 from tqdm import tqdm
 from itertools import chain
+from collections import Counter, OrderedDict
+
+class OrderedCounter(Counter, OrderedDict):
+     'Counter that remembers the order elements are first seen'
+     def __repr__(self):
+         return '%s(%r)' % (self.__class__.__name__,
+                            OrderedDict(self))
+     def __reduce__(self):
+         return self.__class__, (OrderedDict(self),)
 
 class AverageMeter(object):
    """Computes and stores the average and current value"""
