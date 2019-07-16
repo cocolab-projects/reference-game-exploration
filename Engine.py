@@ -111,14 +111,14 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
-        self.train_dataset = Chairs_ReferenceGame(split='Train')
+        self.train_dataset = Chairs_ReferenceGame(split='Train', context_condition=self.distance)
         self.data = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, split_mode=self.distance)
-        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, split_mode=self.distance)
+        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance)
+        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
@@ -297,7 +297,7 @@ class Engine(object):
         return epoch
         
     def final_accuracy(self):
-        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data)
+        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition='self.distance')
         ref_loader = DataLoader(ref_dataset, shuffle=False, batch_size=self.bs)
         N_mini_batches = len(ref_loader)
         with torch.no_grad():
@@ -333,7 +333,7 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data)
+        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance)
         test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():
@@ -352,7 +352,7 @@ class Engine(object):
                 d1_score = self.sup_img(d1_rgb, x_inp, x_len)
                 d2_score = self.sup_img(d2_rgb, x_inp, x_len)
 
-                loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)))
+                loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(self.device))
                 self.loss = loss
                 given_text = get_text(self.vocab['i2w'], np.array(x_inp[0]), x_len[0].item())
              

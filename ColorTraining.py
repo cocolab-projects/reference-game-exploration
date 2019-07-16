@@ -87,7 +87,7 @@ def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
         d1_score = sup_img(d1_rgb, x_inp, x_len)
         d2_score = sup_img(d2_rgb, x_inp, x_len)
 
-        loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)))
+        loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(device))
         
 
         loss_meter.update(loss.item(), batch_size)
@@ -125,7 +125,7 @@ def test(epoch, sup_emb, sup_img, test_loader,device,optimizer):
             d1_score = sup_img(d1_rgb, x_inp, x_len)
             d2_score = sup_img(d2_rgb, x_inp, x_len)
 
-            loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)))
+            loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(device))
 
             loss_meter.update(loss.item(), batch_size)
             

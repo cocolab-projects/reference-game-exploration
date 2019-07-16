@@ -46,11 +46,7 @@ class ChairDataset(data.Dataset):
     def __init__(self, vocab=None, split='Train', context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
         super(ChairDataset, self).__init__()
-        if (split_mode == 'easy'):
-            split_mode = 'far'
-        if (split_mode == 'hard'):
-            split_mode = 'close'
-        assert split_mode in ['far', 'close']
+        assert split_mode in ['easy', 'hard']
 
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
         self.images = np.load(os.path.join(NUMPY_DIR, 'images.npy'))
@@ -72,6 +68,9 @@ class ChairDataset(data.Dataset):
             df = df[df['communication_role'] == 'speaker']
             # note that target_chair is always the chair 
             # so label is always 3
+            if self.context_condition != 'all':
+                df = df[df['context_condition'] == self.context_condition]
+
             df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
             df = df.dropna()
             data = np.asarray(df)
@@ -84,7 +83,7 @@ class ChairDataset(data.Dataset):
         # make sure rows reference existing images
         # print(data)
 
-        if self.split_mode == 'far':
+        if self.split_mode == 'easy':
             # print(data)
             # for each unique chair, divide all rows containing it into
             # training and test sets
@@ -272,11 +271,7 @@ class Chairs_ReferenceGame(data.Dataset):
     def __init__(self, vocab=None, split='Train', train=True, context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
         super(Chairs_ReferenceGame, self).__init__()
-        if (split_mode == 'easy'):
-            split_mode = 'far'
-        if (split_mode == 'hard'):
-            split_mode = 'close'
-        assert split_mode in ['far', 'close']
+        assert split_mode in ['easy', 'hard']
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
         for i in self.names:
             print(i)
@@ -299,6 +294,9 @@ class Chairs_ReferenceGame(data.Dataset):
             df = df[df['communication_role'] == 'speaker']
             # note that target_chair is always the chair 
             # so label is always 3
+            if self.context_condition != 'all':
+                    df = df[df['context_condition'] == self.context_condition]
+
             df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
             df = df.dropna()
             data = np.asarray(df)
@@ -309,7 +307,7 @@ class Chairs_ReferenceGame(data.Dataset):
 
         if (dataVal is None):
             # print(data)
-            if self.split_mode == 'far':
+            if self.split_mode == 'easy':
                 # print(data)
                 # for each unique chair, divide all rows containing it into
                 # training and test sets
