@@ -27,7 +27,7 @@ TRAINING_PERCENTAGE = 64 / 100
 TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
 MAX_LEN = 10
-def load_char_id_to_utterance_map(context_condition='all'):
+def load_char_id_to_utterance_map(context_condition='all')
     with open(os.path.join(RAW_DIR, 'chairs2k_group_data.csv')) as fp:
         df = pd.read_csv(fp)
 
@@ -96,7 +96,7 @@ class ChairDataset(data.Dataset):
                 elif (self.split == 'Validate'):
                     new_data.append(data_i[train_len:-test_len])
                 else:
-                    new_data.append(data_i[test_len:])
+                    new_data.append(data_i[-test_len:])
                 pbar.update()
             pbar.close()
             new_data = np.concatenate(new_data, axis=0)
@@ -112,10 +112,10 @@ class ChairDataset(data.Dataset):
             print('splitting data into train and test')
             if (self.split == 'Train'):  
                 splitter = np.in1d(target_names, target_uniqs[:train_len])
-            elif (self.split == 'Validate'):  
+            elif (self.split == 'Validatation'):  
                 splitter = np.in1d(target_names, target_uniqs[train_len:-test_len])
             else:
-                splitter = np.in1d(target_names, target_uniqs[test_len:])
+                splitter = np.in1d(target_names, target_uniqs[-test_len:])
             data = data[splitter]
 
         # replace target_chair with a label
@@ -314,7 +314,7 @@ class Chairs_ReferenceGame(data.Dataset):
 
                     if (self.split == 'Train'):
                         new_data.append(data_i[:train_len])
-                    elif (self.split == 'Validate'):
+                    elif (self.split == 'Validation'):
                         new_data.append(data_i[train_len:-test_len])
                     else:
                         new_data.append(data_i[test_len:])
@@ -333,7 +333,7 @@ class Chairs_ReferenceGame(data.Dataset):
                 print('splitting data into train and test')
                 if (self.split == 'Train'):  
                     splitter = np.in1d(target_names, target_uniqs[:train_len])
-                elif (self.split == 'Validate'):  
+                elif (self.split == 'Validation'):  
                     splitter = np.in1d(target_names, target_uniqs[train_len:-test_len])
                 else:
                     splitter = np.in1d(target_names, target_uniqs[test_len:])
