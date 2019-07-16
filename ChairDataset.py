@@ -27,7 +27,7 @@ TRAINING_PERCENTAGE = 64 / 100
 TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
 MAX_LEN = 10
-def load_char_id_to_utterance_map(context_condition='all')
+def load_char_id_to_utterance_map(context_condition='all'):
     with open(os.path.join(RAW_DIR, 'chairs2k_group_data.csv')) as fp:
         df = pd.read_csv(fp)
 
