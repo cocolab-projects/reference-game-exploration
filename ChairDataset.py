@@ -78,7 +78,7 @@ class ChairDataset(data.Dataset):
             data = self.clean_data(data, self.names)
             np.save(npy_path, data)
         else:
-            data = np.load(npy_path)
+            data = np.load(npy_path, True)
 
         # print(data)
         # make sure rows reference existing images
@@ -305,7 +305,7 @@ class Chairs_ReferenceGame(data.Dataset):
             data = self.clean_data(data, self.names)
             np.save(npy_path, data)
         else:
-            data = np.load(npy_path)
+            data = np.load(npy_path, True)
 
         if (dataVal is None):
             # print(data)
