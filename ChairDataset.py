@@ -46,7 +46,11 @@ class ChairDataset(data.Dataset):
     def __init__(self, vocab=None, split='Train', context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
         super(ChairDataset, self).__init__()
-        assert split_mode in ['easy', 'hard']
+        if (split_mode == 'easy'):
+            split_mode = 'far'
+        if (split_mode == 'hard'):
+            split_mode = 'close'
+        assert split_mode in ['far', 'close']
 
         self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
         self.images = np.load(os.path.join(NUMPY_DIR, 'images.npy'))
@@ -60,23 +64,24 @@ class ChairDataset(data.Dataset):
         self.split = split
        
         print('loading CSV')
-        csv_path = os.path.join(RAW_DIR, 'chairs2k_group_data.csv')
-        df = pd.read_csv(csv_path)
-        df = df[df['correct'] == True]
-        df = df[df['communication_role'] == 'speaker']
-        if self.context_condition != 'all':
-            df = df[df['context_condition'] == self.context_condition]
-        # note that target_chair is always the chair 
-        # so label is always 3
-        df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
-        df = df.dropna()
-        data = np.asarray(df)
-        # print(data)
-        # make sure rows reference existing images
-        data = self.clean_data(data, self.names)
+        npy_path = os.path.join(RAW_DIR, 'chairs2k_group_data.npy')
+        if not os.path.exists(npy_path):
+            csv_path = os.path.join(RAW_DIR, 'chairs2k_group_data.csv')
+            df = pd.read_csv(csv_path)
+            df = df[df['correct'] == True]
+            df = df[df['communication_role'] == 'speaker']
+            # note that target_chair is always the chair 
+            # so label is always 3
+            df = df[['chair_a', 'chair_b', 'chair_c', 'target_chair', 'text']]
+            df = df.dropna()
+            data = np.asarray(df)
+            data = self.clean_data(data, self.names)
+            np.save(npy_path, data)
+        else:
+            data = np.load(npy_path)
         # print(data)
 
-        if self.split_mode == 'easy':
+        if self.split_mode == 'far':
             # print(data)
             # for each unique chair, divide all rows containing it into
             # training and test sets
