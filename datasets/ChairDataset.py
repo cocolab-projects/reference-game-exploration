@@ -17,7 +17,7 @@ from collections import defaultdict
 
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, 'data')
-NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/'
+NUMPY_DIR = '../mnt/fs5/rona03/chairs_img_npy/'
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
@@ -62,7 +62,7 @@ class Chairs_ReferenceGame(data.Dataset):
             data = self.clean_data(data, self.names)
             np.save(npy_path, data)
         else:
-            data = np.load(npy_path, allow_pickle=True)
+            data = np.load(npy_path, allow_pickle=True, encoding="latin1")
 
         if (dataVal is None):
             # print(data)

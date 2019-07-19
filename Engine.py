@@ -111,14 +111,14 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
-        self.train_dataset = Chairs_ReferenceGame(split='Train', context_condition=self.distance, image_tranform=self.image_transforms)
+        self.train_dataset = Chairs_ReferenceGame(split='Train', context_condition=self.distance, image_transform=self.image_transforms)
         self.data = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_tranform=self.image_transforms)
-        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance,image_tranform=self.image_transforms)
+        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
+        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
@@ -147,12 +147,12 @@ class Engine(object):
         # self.final_perplexity()
              
 
-        if path.exists(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt'):    
-            with open(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt','a') as f:
+        if path.exists(DIR+'plot_data/' + 'plot_' + self.filePath + ".txt"):    
+            with open(DIR+'plot_data/' + 'plot_' + self.filePath + ".txt"):
                 f.write('\n' + str(self.accuracy))
                 f.flush()
         else:
-            completeName = os.path.join(DIR+'plot_data/' + 'plot_' +str(self.distance)+ '_'+str(self.bi)+'_'+str(self.width)+'_'+str(self.num)+'.txt')         
+            completeName = os.path.join(DIR+'plot_' + self.filePath + ".txt")         
             file1 = open(completeName, "w")
             file1.write(str(self.accuracy))
             file1.close()
@@ -297,7 +297,7 @@ class Engine(object):
         return epoch
         
     def final_accuracy(self):
-        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_tranform=self.image_transforms)
+        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
         ref_loader = DataLoader(ref_dataset, shuffle=False, batch_size=self.bs)
         N_mini_batches = len(ref_loader)
         with torch.no_grad():
@@ -333,7 +333,7 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance, image_tranform=self.image_transforms)
+        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance, image_transform=self.image_transforms)
         test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():
