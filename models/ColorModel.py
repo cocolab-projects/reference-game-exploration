@@ -30,7 +30,13 @@ class Supervised(nn.Module):
     @Param hidden_dim: integer [default: 256]
                        number of hidden nodes in GRU
     """
-    def __init__(self, embedding_module, bi, width, number, rgb_dim=3):
+    # Bi = Bidirectional (True/False)
+    # Width = length of final batch (Skinny, Medium, Fat)
+    # Number = number of hidden layers after concat (1,2,3)
+    def __init__(self, embedding_module,
+     bi = True, 
+     width = "Medium", 
+     number = 2, rgb_dim=3):
         super(Supervised, self).__init__()
 
         self.rgb_dim = rgb_dim

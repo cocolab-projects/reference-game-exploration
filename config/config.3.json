@@ -1,23 +1,20 @@
 {
-    "seed": 1,
-    "name": "test",
-    "out_dir": "color_data",
-    "model": [
+  "seed": 3,
+  "name": "Creatures Test",
+  "out_dir": "creatures_data",
+  "model": [
+    {
+      "type": "Creatures",
+      "file_path": "../models/CreaturesModel.py"
+    }
+  ],
+  "training": [
       {
-        "bidir": false,
-        "file_path": "../models",
-        "dis": "far"
+        "batch_size": 100,
+        "learning_rate": 0.0002,
+        "epochs": 7,
+        "dim": 5,
+        "log_interval": 10
       }
-    ],
-    "training": [
-        {
-          "width": "Skinny",
-          "number": 3,
-          "batch_size": 100,
-          "learning_rate": 0.0002,
-          "epochs": 7,
-          "dim": 5,
-          "log_interval": 10
-        }
-      ]
-  }
+    ]
+}

@@ -20,7 +20,13 @@ class TextEmbedding(nn.Module):
     def forward(self, x):
         return self.embedding(x)
 class Supervised(nn.Module):
-    def __init__(self, embedding_module, bi, width, number, n_filters=64, img_size=32, channels=3):
+    # Bi = Bidirectional (True/False)
+    # Width = length of final batch (Skinny, Medium, Fat)
+    # Number = number of hidden layers after concat (1,2,3)
+    def __init__(self, embedding_module,
+     bi = True, 
+     width = "Medium", 
+     number = 2, n_filters=64, img_size=32, channels=3):
         super(Supervised, self).__init__()
         self.embedding = embedding_module
         self.embedding_dim = embedding_module.embedding.embedding_dim
