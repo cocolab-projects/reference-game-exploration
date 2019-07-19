@@ -17,7 +17,7 @@ from collections import defaultdict
 
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, 'data')
-NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/numpy/numpy/'
+NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/'
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
@@ -33,8 +33,8 @@ class Chairs_ReferenceGame(data.Dataset):
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
         super(Chairs_ReferenceGame, self).__init__()
         assert split_mode in ['easy', 'hard']
-        self.names = np.load(os.path.join(NUMPY_DIR, 'names.npy'))
-        self.images = np.load(os.path.join(NUMPY_DIR, 'images.npy'))
+        self.names = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/names.npy'))
+        self.images = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/images.npy'))
         chair_list = []
         for i in self.names:
             i = str(i.decode('utf-8'))
@@ -45,7 +45,7 @@ class Chairs_ReferenceGame(data.Dataset):
         self.train = train
         self.split = split
         print('loading CSV')
-        npy_path = os.path.join(RAW_DIR, 'chairs2k_group_data.npy')
+        npy_path = os.path.join(NUMPY_DIR, 'chairs2k_group_data.npy')
         if not os.path.exists(npy_path):
             csv_path = os.path.join(RAW_DIR, 'chairs2k_group_data.csv')
             df = pd.read_csv(csv_path)
