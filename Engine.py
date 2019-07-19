@@ -25,7 +25,6 @@ from ChairDataset import (ChairDataset,Chairs_ReferenceGame)
 import fileinput
 import time 
 
-
 DIR = '/mnt/fs5/rona03/'
 #Run through list in the data folder?
 
@@ -59,7 +58,6 @@ class Engine(object):
             print(colored("==begining data (args put in)==", 'magenta'))
             print(colored("Directory: "+ self.dir, 'cyan'))
             print(colored("File Name: "+ self.fileName, 'cyan'))
-
             print(colored("==ending data (args put in)==", 'magenta'))
             print(" ")
 

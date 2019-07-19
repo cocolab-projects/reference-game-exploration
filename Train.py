@@ -12,61 +12,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-from ChairDataset import ChairDataset, Chairs_ReferenceGame
 
 from utils import (AverageMeter, save_checkpoint)
-from ChairModel import TextEmbedding, Supervised
-
-
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('out_dir', type=str, help='where to save checkpoints')
-    parser.add_argument('--d-dim', type=int, default=100,
-                        help='number of hidden dimensions [default: 100]')
-    parser.add_argument('--batch_size', type=int, default=100,
-                        help='batch size [default=100]')
-    parser.add_argument('--lr', type=float, default=0.0002,
-                        help='learning rate [default=0.0002]')
-    parser.add_argument('--epochs', type=int, default=200,
-                        help='number of training epochs [default: 200]')
-    parser.add_argument('--log-interval', type=int, default=10,
-                        help='interval to print results [default: 10]')
-    parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--cuda', action='store_true', help='Enable cuda')
-    args = parser.parse_args()
-    
-    args.cuda = args.cuda and torch.cuda.is_available()
-
-    if not os.path.isdir(args.out_dir):
-        os.makedirs(args.out_dir)
-
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
-
-    device = torch.device('cuda' if args.cuda else 'cpu')
-
-    # data_dir = get_data_dir(args.dataset)
-    train_dataset = Chairs_ReferenceGame(split='Train')
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size)
-    N_mini_batches = len(train_loader)
-    vocab_size = train_dataset.vocab_size
-    vocab = train_dataset.vocab
-
-    test_dataset = Chairs_ReferenceGame(vocab=vocab, split='Validation')
-    test_loader = DataLoader(test_dataset, shuffle=False, batch_size=args.batch_size)
-
-    sup_emb = TextEmbedding(vocab_size)
-    sup_img = Supervised(sup_emb)
-    
-    sup_emb = sup_emb.to(device)
-    sup_img = sup_img.to(device)
-    optimizer = torch.optim.Adam(
-        chain(
-            sup_emb.parameters(), 
-            sup_img.parameters(),
-        ), lr=args.lr)
 
 
 def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
