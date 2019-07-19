@@ -48,7 +48,7 @@ class Engine(object):
         args.cuda = args.cuda and torch.cuda.is_available()
         self.fd = args.full_diagnostic
         self.device = torch.device('cuda' if args.cuda else 'cpu')
-        self.image_transforms = [transforms.Resize(224)]
+        self.image_transforms = transforms.Resize(32)
 
         self.loss = None
         self.accuracy = None
@@ -92,7 +92,11 @@ class Engine(object):
 
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
+        self.type = self.parsed['type']
 
+
+
+        
         self.name = self.parsed['name']
         self.modelDir = self.parsed['model'][0]
         self.trainDir = self.parsed['training'][0]

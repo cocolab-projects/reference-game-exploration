@@ -273,7 +273,6 @@ class Chairs_ReferenceGame(data.Dataset):
 
         chair_c_pt = torch.from_numpy(chair_c_np).unsqueeze(0)
         chair_c = transforms.ToPILImage()(chair_c_pt).convert('RGB')
-
         if self.image_transform is not None:
             chair_a = self.image_transform(chair_a)
             chair_b = self.image_transform(chair_b)
