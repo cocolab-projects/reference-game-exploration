@@ -91,7 +91,6 @@ class Crea_ReferenceGame(data.Dataset):
 
         self.image_transform = image_transform
 
-        self.__getitem__(1)
         # print(self.vocab)
 
     def build_vocab(self, texts):
@@ -192,7 +191,6 @@ class Crea_ReferenceGame(data.Dataset):
         length = self.lengths[index]
 
         trans = transforms.ToTensor()
-        breakpoint()
 
         return trans(image_np_tgt_PIL), trans(image_np_1_PIL), trans(image_np_2_PIL), inputs, length
 
@@ -271,4 +269,3 @@ def preprocess_text(text):
     return tokens
 
 
-crea = Crea_ReferenceGame()
