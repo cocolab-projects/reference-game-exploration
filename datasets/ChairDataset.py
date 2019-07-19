@@ -307,8 +307,13 @@ def preprocess_text(text):
     while i < len(tokens):
         while (tokens[i] != '.' and '.' in tokens[i]):
             tokens[i] = tokens[i].replace('.','')
+
         while (tokens[i] != '\'' and '\'' in tokens[i]):
             tokens[i] = tokens[i].replace('\'','')
+
+        while (tokens[i] != '~' and '~' in tokens[i]):
+            tokens[i] = tokens[i].replace('~','')
+
         while('-' in tokens[i] or '/' in tokens[i]):
             if tokens[i] == '/' or tokens[i] == '-':
                 tokens.pop(i)
@@ -347,7 +352,7 @@ def preprocess_text(text):
         if tokens[i].endswith('ish'):
             tokens[i] = tokens[i][:-3]
             i += 1
-            tokens.insert(i, 'est')
+            tokens.insert(i, 'ish')
         if tokens[i-1].endswith('er'):
             tokens[i-1] = tokens[i-1][:-2]
             i += 1
@@ -359,7 +364,7 @@ def preprocess_text(text):
         if tokens[i-1].endswith('ish'):
             tokens[i-1] = tokens[i-1][:-3]
             i += 1
-            tokens.insert(i-1, 'est')
+            tokens.insert(i-1, 'ish')
         i += 1
     replace = {'redd':'red', 'gren': 'green', 'whit':'white', 'biege':'beige', 'purp':'purple', 'olve':'olive', 'ca':'can', 'blu':'blue', 'orang':'orange', 'gray':'grey'}
     for i in range(len(tokens)):
@@ -368,5 +373,4 @@ def preprocess_text(text):
     while '' in tokens:
         tokens.remove('')
     return tokens
-
 
