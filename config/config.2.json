@@ -5,7 +5,8 @@
   "model": [
     {
       "type": "Color",
-      "file_path": "../models/ColorModel.py"
+      "file_path": "../models/ColorModel.py",
+      "dis": "far"
     }
   ],
   "training": [

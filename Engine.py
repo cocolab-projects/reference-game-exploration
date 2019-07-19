@@ -10,23 +10,23 @@ from tqdm import tqdm
 from itertools import chain
 import matplotlib.pyplot as plt
 import json
-from ChairTraining import test,train
+from Train import test,train
 from colorama import init 
 from termcolor import colored 
 from utils import (AverageMeter, save_checkpoint,get_text)
-from ChairModel import TextEmbedding, Supervised
+from models.ChairModel import TextEmbedding, Supervised
 import torch 
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-from ChairDataset import (ChairDataset,Chairs_ReferenceGame)
+from datasets.ChairDataset import (Chairs_ReferenceGame)
 import fileinput
 import time 
 from torchvision import transforms
 
-DIR = '/mnt/fs5/rona03/'
+DIR = '../mnt/fs5/rona03/'
 #Run through list in the data folder?
 
 class Engine(object):
@@ -97,13 +97,13 @@ class Engine(object):
         self.modelDir = self.parsed['model'][0]
         self.trainDir = self.parsed['training'][0]
         
-        self.bi = self.modelDir['bidir']
+        # self.bi = self.modelDir['bidir']
         self.distance = self.modelDir['dis']
         self.filePath = self.modelDir['file_path']
 
         self.lr = self.trainDir['learning_rate']
-        self.num = self.trainDir['number']
-        self.width = self.trainDir['width']
+        #self.num = self.trainDir['number']
+        #self.width = self.trainDir['width']
 
         self.bs = self.trainDir['batch_size']
         self.epochs = self.trainDir['epochs']
@@ -122,7 +122,7 @@ class Engine(object):
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
-        self.sup_img = Supervised(self.sup_emb, self.bi,self.width,self.num)
+        self.sup_img = Supervised(self.sup_emb)
         self.sup_emb = self.sup_emb.to(self.device)
         self.sup_img = self.sup_img.to(self.device)
         self.optimizer = torch.optim.Adam(
@@ -426,4 +426,4 @@ class Engine(object):
         perplexity = pow(perplexity, 1/float(N)) 
         return perplexity
 
-color = Engine()
+run = Engine()

@@ -5,7 +5,8 @@
   "model": [
     {
       "type": "Creatures",
-      "file_path": "../models/CreaturesModel.py"
+      "file_path": "../models/CreaturesModel.py",
+      "dis": "far"
     }
   ],
   "training": [

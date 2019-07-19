@@ -5,7 +5,8 @@
     "model": [
       {
         "type": "Chair",
-        "file_path": "../models/ChairModel.py"
+        "file_path": "../models/ChairModel.py",
+        "dis": "far"
       }
     ],
     "training": [
