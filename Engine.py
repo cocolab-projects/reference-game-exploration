@@ -329,7 +329,9 @@ class Engine(object):
                 tgt_rgb = tgt_rgb.to(self.device).float()
                 d1_rgb = d1_rgb.to(self.device).float()
                 d2_rgb = d2_rgb.to(self.device).float()
-                
+                x_inp = x_inp.to(self.device)
+                x_len = x_len.to(self.device)
+
                 tgt_score = self.sup_img(tgt_rgb, x_inp, x_len)
                 d1_score = self.sup_img(d1_rgb, x_inp, x_len)
                 d2_score = self.sup_img(d2_rgb, x_inp, x_len)
