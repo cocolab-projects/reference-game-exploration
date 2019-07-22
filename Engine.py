@@ -310,8 +310,7 @@ class Engine(object):
         return epoch
         
     def final_accuracy(self):
-        ref_dataset = ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
-        ref_loader = DataLoader(ref_dataset, shuffle=False, batch_size=self.bs)
+        ref_loader = DataLoader(self.ref_dataset, shuffle=False, batch_size=self.bs)
         N_mini_batches = len(ref_loader)
         with torch.no_grad():
 
@@ -346,8 +345,7 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance, image_transform=self.image_transforms)
-        test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
+        test_loader = DataLoader(self.test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():
             loss_meter = AverageMeter()
