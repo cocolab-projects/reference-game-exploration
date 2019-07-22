@@ -28,7 +28,7 @@ import importlib.util
 
 
 DIR = '/mnt/fs5/rona03/'
-
+DIR_DATA = ''
 #Run through list in the data folder?
 
 class Engine(object):
@@ -109,15 +109,15 @@ class Engine(object):
         if self.type == "Color":
             from datasets.ColorDataset import (ReferenceGame)
             from models.ColorModel import TextEmbedding, Supervised
-            self.DIR_DATA = 'color_data/'
+            DIR_DATA = 'color_data/'
         elif self.type == "Chair":
             from datasets.ChairDataset import (ReferenceGame)
             from models.ChairModel import TextEmbedding, Supervised
-            self.DIR_DATA = 'chair_data/'
+            DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
             from datasets.CreaturesDataset import (ReferenceGame)
             from models.CreaturesModel import TextEmbedding, Supervised
-            self.DIR_DATA = 'crea_data/'
+            DIR_DATA = 'crea_data/'
 
 
         self.lr = self.trainDir['learning_rate']
@@ -285,7 +285,7 @@ class Engine(object):
         test_loss = test(epoch,self.sup_emb,self.sup_img,self.test_loader,self.device,self.optimizer)
         return test_loss
 
-    def load_model(self,folder=DIR+self.DIR_DATA, filename='checkpoint.pth.tar'):
+    def load_model(self,folder=DIR+DIR_DATA, filename='checkpoint.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         track_loss = checkpoint['track_loss']
@@ -305,7 +305,7 @@ class Engine(object):
         print(" ")
         return epoch, track_loss, sup_emb, sup_img, vocab, vocab_size
 
-    def load_best(self, folder=DIR+self.DIR_DATA, filename='model_best.pth.tar'):
+    def load_best(self, folder=DIR+DIR_DATA, filename='model_best.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         
