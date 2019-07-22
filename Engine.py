@@ -27,7 +27,7 @@ import importlib.util
 
 
 
-DIR = '../mnt/fs5/rona03/'
+DIR = '/mnt/fs5/rona03/'
 #Run through list in the data folder?
 
 class Engine(object):
