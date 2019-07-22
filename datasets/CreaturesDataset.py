@@ -14,7 +14,7 @@ from torchvision import transforms
 from collections import defaultdict
 
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
-DATA_DIR = os.path.join("../", 'data/pilot_coll1/')
+DATA_DIR = os.path.join(FILE_DIR, '../data/pilot_coll1/')
 RAW_DIR = os.path.join(FILE_DIR, '../data')
 
 NUMPY_DIR = '/mnt/fs5/rona03/crea_img_npy'
@@ -28,10 +28,10 @@ TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 1
 MAX_LEN = 10
 
-class Crea_ReferenceGame(data.Dataset):
+class ReferenceGame(data.Dataset):
     def __init__(self, vocab=None, split='Validation', train=True, context_condition='all', 
                  image_size=32, image_transform=None, dataVal=None):
-        super(Crea_ReferenceGame, self).__init__()
+        super(ReferenceGame, self).__init__()
 
         self.split = split
        
@@ -169,13 +169,30 @@ class Crea_ReferenceGame(data.Dataset):
     def __getitem__(self, index):
         _, msg, distr1, distr2, target = self.data[index]
         # chair_target = chair_target + '.png'
-        for root, dirs, files in os.walk(DATA_DIR+'val/vision/imgs'):
-            if distr1 in files:
-                image_np_1 = os.path.join(root, distr1)
-            if distr2 in files:
-                image_np_2 = os.path.join(root, distr2)
-            if target in files:
-                image_np_tgt = os.path.join(root, target)
+        if self.split == "Train":
+            for root, dirs, files in os.walk(DATA_DIR+'train/vision/imgs'):
+                if distr1 in files:
+                    image_np_1 = os.path.join(root, distr1)
+                if distr2 in files:
+                    image_np_2 = os.path.join(root, distr2)
+                if target in files:
+                    image_np_tgt = os.path.join(root, target)
+        if self.split == "Validation":
+            for root, dirs, files in os.walk(DATA_DIR+'val/vision/imgs'):
+                if distr1 in files:
+                    image_np_1 = os.path.join(root, distr1)
+                if distr2 in files:
+                    image_np_2 = os.path.join(root, distr2)
+                if target in files:
+                    image_np_tgt = os.path.join(root, target)
+        if self.split == "Test":
+            for root, dirs, files in os.walk(DATA_DIR+'test/vision/imgs'):
+                if distr1 in files:
+                    image_np_1 = os.path.join(root, distr1)
+                if distr2 in files:
+                    image_np_2 = os.path.join(root, distr2)
+                if target in files:
+                    image_np_tgt = os.path.join(root, target)
         image_np_1_PIL = Image.open(image_np_1)
         image_np_2_PIL = Image.open(image_np_2)
         image_np_tgt_PIL = Image.open(image_np_tgt)

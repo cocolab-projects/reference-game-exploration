@@ -14,17 +14,18 @@ from Train import test,train
 from colorama import init 
 from termcolor import colored 
 from utils import (AverageMeter, save_checkpoint,get_text)
-from models.ChairModel import TextEmbedding, Supervised
 import torch 
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-from datasets.ChairDataset import (Chairs_ReferenceGame)
 import fileinput
 import time 
 from torchvision import transforms
+import importlib.util
+
+
 
 DIR = '../mnt/fs5/rona03/'
 #Run through list in the data folder?
@@ -92,11 +93,7 @@ class Engine(object):
 
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
-        self.type = self.parsed['type']
 
-
-
-        
         self.name = self.parsed['name']
         self.modelDir = self.parsed['model'][0]
         self.trainDir = self.parsed['training'][0]
@@ -104,6 +101,18 @@ class Engine(object):
         # self.bi = self.modelDir['bidir']
         self.distance = self.modelDir['dis']
         self.filePath = self.modelDir['file_path']
+        self.type = self.modelDir['type']
+
+        if self.type == "Color":
+            from datasets.ColorDataset import (ReferenceGame)
+            from models.ColorModel import TextEmbedding, Supervised
+        elif self.type == "Chair":
+            from datasets.ChairDataset import (ReferenceGame)
+            from models.ChairModel import TextEmbedding, Supervised
+        elif self.type == "Creatures":
+            from datasets.CreaturesDataset import (ReferenceGame)
+            from models.CreaturesModel import TextEmbedding, Supervised
+
 
         self.lr = self.trainDir['learning_rate']
         #self.num = self.trainDir['number']
@@ -115,14 +124,14 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
-        self.train_dataset = Chairs_ReferenceGame(split='Train', context_condition=self.distance, image_transform=self.image_transforms)
+        self.train_dataset = ReferenceGame(split='Train', context_condition=self.distance, image_transform=self.image_transforms)
         self.data = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-        self.ref_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
-        self.test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
+        self.ref_dataset = ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
+        self.test_dataset = ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
 
         self.sup_emb = TextEmbedding(self.vocab_size)
@@ -301,7 +310,7 @@ class Engine(object):
         return epoch
         
     def final_accuracy(self):
-        ref_dataset = Chairs_ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
+        ref_dataset = ReferenceGame(self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
         ref_loader = DataLoader(ref_dataset, shuffle=False, batch_size=self.bs)
         N_mini_batches = len(ref_loader)
         with torch.no_grad():
@@ -337,7 +346,7 @@ class Engine(object):
 
     def final_loss(self):
         print(colored("==begining data (final loss)==", 'magenta'))
-        test_dataset = Chairs_ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance, image_transform=self.image_transforms)
+        test_dataset = ReferenceGame(vocab=self.vocab, split='Test', dataVal = self.data, context_condition=self.distance, image_transform=self.image_transforms)
         test_loader = DataLoader(test_dataset, shuffle=True, batch_size=self.bs)
         N_mini_batches = len(test_loader)
         with torch.no_grad():

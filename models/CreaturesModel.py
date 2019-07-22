@@ -26,7 +26,7 @@ class Supervised(nn.Module):
     def __init__(self, embedding_module,
      bi = True, 
      width = "Medium", 
-     number = 2, n_filters=64, img_size=32, channels=3):
+     number = 2, n_filters=64, img_size=32, channels=4):
         super(Supervised, self).__init__()
         self.embedding = embedding_module
         self.embedding_dim = embedding_module.embedding.embedding_dim

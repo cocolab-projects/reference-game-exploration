@@ -1,7 +1,7 @@
 {
   "seed": 3,
   "name": "Creatures Test",
-  "out_dir": "creatures_data",
+  "out_dir": "crea_data",
   "model": [
     {
       "type": "Creatures",

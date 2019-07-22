@@ -24,7 +24,7 @@ from nltk.tokenize import RegexpTokenizer
 from collections import defaultdict
 
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
-RAW_DIR = os.path.join(FILE_DIR, 'data')
+RAW_DIR = os.path.join(FILE_DIR, '../data')
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
 PAD_TOKEN = '<pad>'
@@ -34,15 +34,16 @@ TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
 MAX_LEN = 10
 
-class Colors_ReferenceGame(data.Dataset):
-    def __init__(self, vocab=None, split='Test', dis='far'):
+class ReferenceGame(data.Dataset):
+    def __init__(self, vocab=None, split='Test', context_condition='far', image_transform=None, dataVal=None):
+        super(ReferenceGame, self).__init__()
 
         with open(os.path.join(RAW_DIR, 'filteredCorpus.csv')) as fp:
             df = pd.read_csv(fp)
         # Only pick out data with true outcomes, far(=easy) conditions, and speaker text
         df = df[df['outcome'] == True]
         df = df[df['role'] == 'speaker']
-        df = df[df['condition'] == dis]
+        df = df[df['condition'] == context_condition]
         
         self.texts = []
         self.rounds = []
@@ -86,7 +87,7 @@ class Colors_ReferenceGame(data.Dataset):
         self.tgt_RGBs, self.d1_RGBs, self.d2_RGBs, self.texts = \
                 self.concatenate_by_round(self.texts, self.tgt_images, self.d1_images, self.d2_images, self.rounds)
         self.inputs, self.lengths, self.max_len = self.process_texts(self.texts)
-
+        self.data = self.texts
     def process_texts(self, texts):
         inputs, lengths = [], []
         n = len(texts)

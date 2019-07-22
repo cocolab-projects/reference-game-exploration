@@ -28,10 +28,10 @@ TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
 MAX_LEN = 10
 
-class Chairs_ReferenceGame(data.Dataset):
+class ReferenceGame(data.Dataset):
     def __init__(self, vocab=None, split='Train', train=True, context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
-        super(Chairs_ReferenceGame, self).__init__()
+        super(ReferenceGame, self).__init__()
         assert split_mode in ['easy', 'hard']
         self.names = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/names.npy'))
         self.images = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/images.npy'))
