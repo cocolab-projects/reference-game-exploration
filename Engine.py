@@ -160,12 +160,12 @@ class Engine(object):
         # self.final_perplexity()
              
 
-        if path.exists(DIR+'plot_data/' + 'plot_' + self.filePath + ".txt"):    
-            with open(DIR+'plot_data/' + 'plot_' + self.filePath + ".txt"):
+        if path.exists(DIR+'plot_data/' + 'plot_' + self.dir + ".txt"):    
+            with open(DIR+'plot_data/' + 'plot_' + self.dir + ".txt"):
                 f.write('\n' + str(self.accuracy))
                 f.flush()
         else:
-            completeName = os.path.join(DIR+'plot_' + self.filePath + ".txt")         
+            completeName = os.path.join(DIR+'plot_' + self.dir + ".txt")         
             file1 = open(completeName, "w")
             file1.write(str(self.accuracy))
             file1.close()
