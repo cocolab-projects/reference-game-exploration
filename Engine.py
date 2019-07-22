@@ -371,7 +371,6 @@ class Engine(object):
 
                 loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(self.device))
                 self.loss = loss
-                given_text = get_text(self.vocab['i2w'], np.array(x_inp[0].cpu()), x_len[0].item())
              
                 loss_meter.update(loss.item(), batch_size)
             print(colored('====> Final Test Loss: {:.4f}'.format(loss_meter.avg),'cyan'))
