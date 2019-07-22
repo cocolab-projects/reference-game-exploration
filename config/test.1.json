@@ -1,10 +1,10 @@
 {
   "seed": 3,
-  "name": "Chair Test",
+  "name": "Chair Test1",
   "out_dir": "chair_data",
   "model": [
     {
-      "type": "Chair1",
+      "type": "Chair",
       "file_path": "../models/ChairModel.py",
       "dis": "far"
     }

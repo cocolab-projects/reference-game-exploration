@@ -1,11 +1,11 @@
 {
     "seed": 2,
-    "name": "Color Test",
-    "out_dir": "color_data",
+    "name": "Creatures Test1",
+    "out_dir": "crea_data",
     "model": [
       {
-        "type": "Color",
-        "file_path": "../models/ColorModel.py",
+        "type": "Creatures",
+        "file_path": "../models/CreaturesModel.py",
         "dis": "far"
       }
     ],
