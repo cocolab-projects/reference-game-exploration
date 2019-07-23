@@ -135,6 +135,8 @@ class Engine(object):
 
             if self.name == "Chair_Test":
                 from models.ChairModel import TextEmbedding, Supervised
+                print("chair model int")
+
             # if self.self.name == "":
             # if self.self.name == "":
             # if self.self.name == "":
