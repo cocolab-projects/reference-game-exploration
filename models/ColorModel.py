@@ -50,6 +50,11 @@ class Supervised(nn.Module):
         self.rgb_seq = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
                                         nn.ReLU(),  \
                                         nn.Linear(self.hidden_dim, self.hidden_dim // 2))
+
+        self.layer = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
+                                        nn.ReLU(),  \
+                                        nn.Linear(self.hidden_dim, self.hidden_dim))
+
         self.sequential = None
         self.hidden = []
         self.number = number
@@ -141,6 +146,13 @@ class Supervised(nn.Module):
         #                 nn.Linear(2, 100, 256))
         
         # sequential(rgb_hidden2)
+        input_lay = self.layer(rgb)
+        rgb_hidden = self.rgb_seq(rgb)
+
+        x2 = input_lay.unsqueeze(0)
+        x3 = torch.cat((x2, x2), 0)
+        # layer = self.txt_lin(rgb_hidden)
+
         _, hidden = self.gru(packed)
         hidden = hidden[-1, ...]
         
@@ -149,8 +161,6 @@ class Supervised(nn.Module):
             hidden = hidden[reversed_idx]
         # print(hidden)
         txt_hidden = self.txt_lin(hidden)
-        rgb_hidden = self.rgb_seq(rgb)
-
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
         # for layer in self.hidden:
         #     concat = F.relu(layer(concat))

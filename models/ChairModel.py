@@ -135,6 +135,8 @@ class Supervised(nn.Module):
         # embed sequences
         embed_seq = self.embedding(seq)
         # pack padded sequences
+
+        
         packed = rnn_utils.pack_padded_sequence(
             embed_seq,
             sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)

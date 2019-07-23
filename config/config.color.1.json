@@ -1,0 +1,21 @@
+{
+  "seed": 2,
+  "name": "Color_Test_Medium_2",
+  "out_dir": "color_data",
+  "model": [
+    {
+      "type": "Color",
+      "file_path": "../models/ColorModel.py",
+      "dis": "far"
+    }
+  ],
+  "training": [
+      {
+        "batch_size": 100,
+        "learning_rate": 0.0002,
+        "epochs": 20,
+        "dim": 5,
+        "log_interval": 10
+      }
+    ]
+}

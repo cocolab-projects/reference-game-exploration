@@ -107,14 +107,45 @@ class Engine(object):
         self.type = self.modelDir['type']
 
         if self.type == "Color":
+            if self.name == "Color_Test_Medium_1":
+                from models.ColorModel_Medium_1 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Medium_2":
+                from models.ColorModel_Medium_2 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Medium_3":
+                from models.ColorModel_Medium_3 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Skinny_1":
+                from models.ColorModel_Skinny_1 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Skinny_2":
+                from models.ColorModel_Skinny_2 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Skinny_3":
+                from models.ColorModel_Skinny_3 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Fat_1":
+                from models.ColorModel_Fat_1 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Fat_2":
+                from models.ColorModel_Fat_2 import TextEmbedding, Supervised
+            if self.name == "Color_Test_Fat_3":
+                from models.ColorModel_Fat_3 import TextEmbedding, Supervised
+
+            if self.name == "Color_Test":
+                from models.ColorModel import TextEmbedding, Supervised
+
             from datasets.ColorDataset import (ReferenceGame)
-            from models.ColorModel import TextEmbedding, Supervised
             DIR_DATA = 'color_data/'
         elif self.type == "Chair":
+
+            if self.name == "Chair_Test":
+                from models.ChairModel import TextEmbedding, Supervised
+            # if self.self.name == "":
+            # if self.self.name == "":
+            # if self.self.name == "":
+
             from datasets.ChairDataset import (ReferenceGame)
-            from models.ChairModel import TextEmbedding, Supervised
             DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
+            # if self.self.name == "":
+            # if self.self.name == "":
+            # if self.self.name == "":
+
             from datasets.CreaturesDataset import (ReferenceGame)
             from models.CreaturesModel import TextEmbedding, Supervised
             DIR_DATA = 'crea_data/'
@@ -164,14 +195,14 @@ class Engine(object):
         self.final_accuracy()
         self.final_time()
         # self.final_perplexity()
-             
+        print(DIR+'plot_data/' + 'plot_' + self.name + ".txt") 
 
-        if path.exists(DIR+'plot_data/' + 'plot_' + self.dir + ".txt"):    
-            with open(DIR+'plot_data/' + 'plot_' + self.dir + ".txt"):
+        if path.exists(DIR+'plot_data/' + 'plot_' + self.name + ".txt"):    
+            with open(DIR+'plot_data/' + 'plot_' + self.name + ".txt", 'a') as f:
                 f.write('\n' + str(self.accuracy))
                 f.flush()
         else:
-            completeName = os.path.join(DIR+'plot_' + self.dir + ".txt")         
+            completeName = os.path.join(DIR+'plot_data/' + 'plot_' + self.name + ".txt")         
             file1 = open(completeName, "w")
             file1.write(str(self.accuracy))
             file1.close()
