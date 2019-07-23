@@ -127,7 +127,7 @@ class Engine(object):
                 from models.ColorModel_Fat_3 import TextEmbedding, Supervised
 
             if self.name == "Color_Test":
-                from models.ColorModel import TextEmbedding, Supervised
+                from models.ColorModel_X_Cell import TextEmbedding, Supervised
 
             from datasets.ColorDataset import (ReferenceGame)
             DIR_DATA = 'color_data/'

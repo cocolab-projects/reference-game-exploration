@@ -9,16 +9,18 @@ import torch.nn.functional as F
 from torchvision import transforms
 import torch.nn.utils.rnn as rnn_utils
 
+
 class TextEmbedding(nn.Module):
     """ Embeds a |vocab_size| number
 
     """
     def __init__(self, vocab_size, hidden_dim=64):
-        super(TextEmbedding, self).__init__()
+        super().__init__()
         self.embedding = nn.Embedding(vocab_size, hidden_dim)
     
     def forward(self, x):
         return self.embedding(x)
+
 
 class Supervised(nn.Module):
     """
@@ -33,11 +35,14 @@ class Supervised(nn.Module):
     # Bi = Bidirectional (True/False)
     # Width = length of final batch (Skinny, Medium, Fat)
     # Number = number of hidden layers after concat (1,2,3)
-    def __init__(self, embedding_module,
-     bi = True, 
-     width = "Medium", 
-     number = 2, rgb_dim=3):
-        super(Supervised, self).__init__()
+    def __init__(
+        self,
+        embedding_module,
+        bi = True, 
+        width = "Medium", 
+        number = 2, rgb_dim=3
+    ):
+        super().__init__()
 
         self.rgb_dim = rgb_dim
         self.embedding = embedding_module
@@ -47,13 +52,17 @@ class Supervised(nn.Module):
 
         self.gru = nn.GRU(self.embedding_dim, self.hidden_dim, batch_first=True, bidirectional=bi)
         self.txt_lin = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
-        self.rgb_seq = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
-                                        nn.ReLU(),  \
-                                        nn.Linear(self.hidden_dim, self.hidden_dim // 2))
+        self.rgb_seq = nn.Sequential(
+            nn.Linear(rgb_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim // 2)
+        )
 
-        self.layer = nn.Sequential(nn.Linear(rgb_dim, self.hidden_dim), \
-                                        nn.ReLU(),  \
-                                        nn.Linear(self.hidden_dim, self.hidden_dim))
+        self.rgb_to_rnn = nn.Sequential(
+            nn.Linear(rgb_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim)
+        )
 
         self.sequential = None
         self.hidden = []
@@ -138,34 +147,31 @@ class Supervised(nn.Module):
             embed_seq,
             sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
 
-        # forward RNN
-        # rgb_hidden2 = self.rgb_seq(rgb)
-
-        # sequential = nn.Sequential(nn.Linear(256, 256, 256), \
-        #                 nn.ReLU(),  \
-        #                 nn.Linear(2, 100, 256))
-        
-        # sequential(rgb_hidden2)
-        input_lay = self.layer(rgb)
+        input_lay = self.rgb_to_rnn(rgb)
         rgb_hidden = self.rgb_seq(rgb)
 
-        x2 = input_lay.unsqueeze(0)
-        x3 = torch.cat((x2, x2), 0)
+        squeezed_rgb = input_lay.unsqueeze(0)
+        formatted_rgb = torch.cat((squeezed_rgb, squeezed_rgb), dim=0)
         # layer = self.txt_lin(rgb_hidden)
 
-        _, hidden = self.gru(packed)
-        hidden = hidden[-1, ...]
-        
-        if batch_size > 1:
-            _, reversed_idx = torch.sort(sorted_idx)
-            hidden = hidden[reversed_idx]
-        # print(hidden)
-        txt_hidden = self.txt_lin(hidden)
-        concat = torch.cat((txt_hidden, rgb_hidden), 1)
-        # for layer in self.hidden:
-        #     concat = F.relu(layer(concat))
+        # _, hidden = self.gru(packed)
+        # hidden = hidden[-1, ...]
 
- 
+        # if batch_size > 1:
+        #     _, reversed_idx = torch.sort(sorted_idx)
+        #     hidden = hidden[reversed_idx]
+        # # print(hidden)
+        # txt_hidden = self.txt_lin(hidden)
+
+        rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim)
+        output = []
+        for i in range(embed_seq.size(0)):
+            hx = rnn(embed_seq[i], hx)
+            output.append(hx)
+        txt_hidden = torch.cat(output)
+
+        breakpoint()
+        concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
         # print("Hi")
         # print (self.sequential(concat))
