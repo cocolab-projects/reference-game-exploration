@@ -164,14 +164,16 @@ class Engine(object):
 
 
         self.train_dataset = ReferenceGame(split='Train', context_condition=self.distance, image_transform=self.image_transforms)
-        self.data = self.train_dataset.data
+        self.dataTrain = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
         self.N_mini_batches = len(self.train_loader)
         self.vocab_size = self.train_dataset.vocab_size
         self.vocab = self.train_dataset.vocab
-        self.ref_dataset = ReferenceGame(vocab=self.vocab, split='Test', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
-        self.test_dataset = ReferenceGame(vocab=self.vocab, split='Validation', dataVal=self.data, context_condition=self.distance,image_transform=self.image_transforms)
+        self.ref_dataset = ReferenceGame(vocab=self.vocab, split='Test', context_condition=self.distance,image_transform=self.image_transforms)
+        self.dataRef = self.ref_dataset.data
+        self.test_dataset = ReferenceGame(vocab=self.vocab, split='Validation', context_condition=self.distance,image_transform=self.image_transforms)
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
+        self.dataTest = self.test_loader.data
 
         self.sup_emb = TextEmbedding(self.vocab_size)
         self.sup_img = Supervised(self.sup_emb)
