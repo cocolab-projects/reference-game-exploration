@@ -288,6 +288,7 @@ class Engine(object):
         t0 = time.time()
 
         for epoch in range(1, self.epochs + 1):
+            breakpoint()
             t_loss = self.train_one_epoch(epoch)
             v_loss = self.validate_one_epoch(epoch)
 
