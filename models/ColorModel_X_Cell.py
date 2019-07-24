@@ -152,11 +152,5 @@ class Supervised(nn.Module):
             hx = self.rnn(embed_seq[:, i], hx)
             hx = torch.cat((hx, rgb_hidden), 1)
             hx = self.basic_layer(hx)
-        txt_hidden = hx
-        concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
-        # print("Hi")
-        # print (self.sequential(concat))
-        # print (self.sequential(self.sequential(concat)))
-
-        return self.sequential(concat)
+        return hx
