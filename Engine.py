@@ -125,10 +125,10 @@ class Engine(object):
         breakpoint()
         split = self.file_path.split('/', 0)
         name = os.path.basename(self.file_path)
-        text = self.file_path.replace(name,"")
+        path = self.file_path.replace(name,"")
 
-        sys.path.append(os.path.dirname(self.file_path))
-        module = __import__(self.file_path)
+        sys.path.append(os.path.dirname(path))
+        module = __import__(name)
         sup = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
