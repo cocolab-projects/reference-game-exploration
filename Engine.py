@@ -125,9 +125,9 @@ class Engine(object):
         breakpoint()
         split = self.file_path.split('/', 0)
         name = os.path.basename(self.file_path)
-        path = self.file_path.replace(name,"")
+        f_path = self.file_path.replace(name,"")
 
-        sys.path.append(os.path.dirname(path))
+        sys.path.append(os.path.dirname(f_path))
         module = __import__(name)
         sup = getattr(module, self.class_name)
 
