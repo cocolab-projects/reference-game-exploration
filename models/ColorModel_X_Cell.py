@@ -69,6 +69,7 @@ class Supervised(nn.Module):
         self.sequential = None
         self.hidden = []
         self.number = number
+        self.basic_layer = nn.Linear(self.hidden_dim, self.hidden // 2)
         self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 2)
 
         if (number == 1):
@@ -145,13 +146,13 @@ class Supervised(nn.Module):
         # pack padded sequences
         rgb_hidden = self.rgb_seq(rgb)
 
-        output = []
         hx = torch.randn(batch_size, self.hidden_dim // 2).to(self.device)
-        breakpoint()
-        for i in range(embed_seq.size(0)):
-            hx = self.rnn(embed_seq[i], hx)
-            output.append(hx)
-        txt_hidden = torch.cat(output)
+        # embed_seq : batch_size x n_words x dim
+        for i in range(embed_seq.size(1)):
+            hx = self.rnn(embed_seq[:, i], hx)
+            hx = torch.cat((hx, rgb_hidden), 1)
+            hx = self.basic_layer(hx)
+        txt_hidden = hx
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
         # print("Hi")
