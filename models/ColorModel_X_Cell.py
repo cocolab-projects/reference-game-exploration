@@ -169,11 +169,12 @@ class Supervised(nn.Module):
 
         output = []
 
-        hx = torch.randn(10, 128).to(self.device)
+        hx = torch.randn(10, 64).to(self.device)
         for i in range(embed_seq.size(0)):
             hx = self.rnn(embed_seq[i], hx)
             output.append(hx)
         txt_hidden = torch.cat(output)
+        breakpoint()
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
         # print("Hi")
