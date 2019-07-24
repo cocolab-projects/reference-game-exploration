@@ -69,7 +69,7 @@ class Supervised(nn.Module):
         self.sequential = None
         self.hidden = []
         self.number = number
-        self.basic_layer = nn.Linear(self.hidden_dim, self.hidden // 2)
+        self.basic_layer = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
         self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 2)
 
         if (number == 1):
