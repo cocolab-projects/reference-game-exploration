@@ -5,6 +5,9 @@ import nltk, collections
 
 import random 
 import sys
+
+
+
 import numpy as np
 from tqdm import tqdm
 from itertools import chain
@@ -53,7 +56,7 @@ class Engine(object):
         self.device = torch.device('cuda' if args.cuda else 'cpu')
         self.image_transforms = transforms.Resize(32)
 
-        
+
 
         self.loss = None
         self.accuracy = None
@@ -120,7 +123,12 @@ class Engine(object):
             DIR_DATA = 'crea_data/'
 
         breakpoint()
-        module = __import__("MultiModel.py")
+        split = word.split('/', 0)) 
+        name = os.path.basename(self.file_path)
+        text = self.file_path.replace(name,"")
+        
+        sys.path.append(os.path.dirname(self.file_path)) 
+        module = __import__(self.file_path)
         sup = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
@@ -182,7 +190,6 @@ class Engine(object):
 
     def __init_model(self, config):
         print("init model")
-        #import file model
         #Model or Training class? Save to a self.var?
     def check_data(self):
         print(colored("==begining data (config)==", 'magenta'))
