@@ -123,7 +123,7 @@ class Engine(object):
             DIR_DATA = 'crea_data/'
 
         breakpoint()
-        split = word.split('/', 0)
+        split = self.file_path.split('/', 0)
         name = os.path.basename(self.file_path)
         text = self.file_path.replace(name,"")
 
