@@ -69,7 +69,7 @@ class Supervised(nn.Module):
         self.sequential = None
         self.hidden = []
         self.number = number
-        self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 4)
+        self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 2)
 
         if (number == 1):
             if (width=='Skinny'):
@@ -139,42 +139,19 @@ class Supervised(nn.Module):
     def forward(self, rgb, seq, length):
         batch_size = seq.size(0)
 
-        if batch_size > 1:
-            sorted_lengths, sorted_idx = torch.sort(length, descending=True)
-            seq = seq[sorted_idx]
-
         # embed sequences
         embed_seq = self.embedding(seq)
 
         # pack padded sequences
-        packed = rnn_utils.pack_padded_sequence(
-            embed_seq,
-            sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
-
-        input_lay = self.rgb_to_rnn(rgb)
         rgb_hidden = self.rgb_seq(rgb)
 
-        squeezed_rgb = input_lay.unsqueeze(0)
-        formatted_rgb = torch.cat((squeezed_rgb, squeezed_rgb), dim=0)
-        # layer = self.txt_lin(rgb_hidden)
-
-        # _, hidden = self.gru(packed)
-        # hidden = hidden[-1, ...]
-
-        # if batch_size > 1:
-        #     _, reversed_idx = torch.sort(sorted_idx)
-        #     hidden = hidden[reversed_idx]
-        # # print(hidden)
-        # txt_hidden = self.txt_lin(hidden)
-
         output = []
-
-        hx = torch.randn(10, 64).to(self.device)
+        hx = torch.randn(batch_size, self.hidden_dim // 2).to(self.device)
+        breakpoint()
         for i in range(embed_seq.size(0)):
             hx = self.rnn(embed_seq[i], hx)
             output.append(hx)
         txt_hidden = torch.cat(output)
-        breakpoint()
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
         # print("Hi")
