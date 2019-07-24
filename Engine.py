@@ -120,7 +120,7 @@ class Engine(object):
 
         
         module = __import__(self.file_path)
-        class = getattr(module, self.class_name)
+        sup = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
         #self.num = self.trainDir['number']
@@ -144,7 +144,7 @@ class Engine(object):
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
         #self.dataTest = self.test_loader.data
 
-        self.sup_img = class(self.vocab_size, device=self.device).to(self.device)
+        self.sup_img = sup(self.vocab_size, device=self.device).to(self.device)
 
 
         self.optimizer = torch.optim.Adam(
