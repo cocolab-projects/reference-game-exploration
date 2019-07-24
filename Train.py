@@ -31,9 +31,9 @@ def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
         x_len = x_len.to(device)
 
         # obtain predicted rgb
-        tgt_score = sup_img(tgt_rgb, x_inp, x_len).to(device)
-        d1_score = sup_img(d1_rgb, x_inp, x_len).to(device)
-        d2_score = sup_img(d2_rgb, x_inp, x_len).to(device)
+        tgt_score = sup_img(tgt_rgb, x_inp, x_len)
+        d1_score = sup_img(d1_rgb, x_inp, x_len)
+        d2_score = sup_img(d2_rgb, x_inp, x_len)
 
         # loss between actual and predicted rgb: Mean Squared Loss !!
         loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(device))
@@ -71,9 +71,9 @@ def test(epoch, sup_emb, sup_img, test_loader,device,optimizer):
             x_len = x_len.to(device)
 
             # obtain predicted rgb
-            tgt_score = sup_img(tgt_rgb, x_inp, x_len).to(device)
-            d1_score = sup_img(d1_rgb, x_inp, x_len).to(device)
-            d2_score = sup_img(d2_rgb, x_inp, x_len).to(device)
+            tgt_score = sup_img(tgt_rgb, x_inp, x_len)
+            d1_score = sup_img(d1_rgb, x_inp, x_len)
+            d2_score = sup_img(d2_rgb, x_inp, x_len)
 
             loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(device))
 
