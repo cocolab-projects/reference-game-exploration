@@ -37,15 +37,14 @@ class Supervised(nn.Module):
     # Number = number of hidden layers after concat (1,2,3)
     def __init__(
         self,
-        embedding_module,
+        vocab_size,
         bi = True, 
         width = "Medium", 
-        number = 2, 
-        rgb_dim=3,
+        number = 2, rgb_dim=3,
         device=None
     ):
         super().__init__()
-        self.device = device
+        embedding_module = TextEmbedding(vocab_size)
         self.rgb_dim = rgb_dim
         self.embedding = embedding_module
         self.embedding_dim = embedding_module.embedding.embedding_dim
@@ -69,9 +68,6 @@ class Supervised(nn.Module):
         self.sequential = None
         self.hidden = []
         self.number = number
-        self.basic_layer = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
-        self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim)
-
         if (number == 1):
             if (width=='Skinny'):
                 self.sequential = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim // 4), \
@@ -140,23 +136,41 @@ class Supervised(nn.Module):
     def forward(self, rgb, seq, length):
         batch_size = seq.size(0)
 
+        if batch_size > 1:
+            sorted_lengths, sorted_idx = torch.sort(length, descending=True)
+            seq = seq[sorted_idx]
+
         # embed sequences
         embed_seq = self.embedding(seq)
 
         # pack padded sequences
+        packed = rnn_utils.pack_padded_sequence(
+            embed_seq,
+            sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
+
+        input_lay = self.rgb_to_rnn(rgb)
         rgb_hidden = self.rgb_seq(rgb)
 
-        hx = torch.randn(batch_size, self.hidden_dim // 2).to(self.device)
-         hx = torch.cat((hx, rgb_hidden), 1)
-        # embed_seq : batch_size x n_words x dim
-        for i in range(embed_seq.size(1)):
-            hx = self.rnn(embed_seq[:, i], hx)
-            hx = self.basic_layer(hx)
-            hx = torch.cat((hx, rgb_hidden), 1)
-            
+        squeezed_rgb = input_lay.unsqueeze(0)
+        formatted_rgb = torch.cat((squeezed_rgb, squeezed_rgb), dim=0)
+        # layer = self.txt_lin(rgb_hidden)
+
+        _, hidden = self.gru(packed)
+        hidden = hidden[-1, ...]
         
-        # option 2
-        # hx = torch.cat((txt_hidden, rgb_hidden), 1)
+        if batch_size > 1:
+            _, reversed_idx = torch.sort(sorted_idx)
+            hidden = hidden[reversed_idx]
+        # print(hidden)
+        txt_hidden = self.txt_lin(hidden)
+        concat = torch.cat((txt_hidden, rgb_hidden), 1)
+        # for layer in self.hidden:
+        #     concat = F.relu(layer(concat))
 
+ 
 
-        return hx
+        # print("Hi")
+        # print (self.sequential(concat))
+        # print (self.sequential(self.sequential(concat)))
+
+        return self.sequential(concat)

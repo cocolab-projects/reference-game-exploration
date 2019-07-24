@@ -103,55 +103,24 @@ class Engine(object):
         
         # self.bi = self.modelDir['bidir']
         self.distance = self.modelDir['dis']
-        self.filePath = self.modelDir['file_path']
+        self.class_name = self.modelDir['class_name']
         self.type = self.modelDir['type']
+        self.file_path = self.modelDir['file_path']
+
 
         if self.type == "Color":
-            if self.name == "Color_Test_Medium_1":
-                from models.ColorModel_Medium_1 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Medium_2":
-                from models.ColorModel_Medium_2 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Medium_3":
-                from models.ColorModel_Medium_3 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Skinny_1":
-                from models.ColorModel_Skinny_1 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Skinny_2":
-                from models.ColorModel_Skinny_2 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Skinny_3":
-                from models.ColorModel_Skinny_3 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Fat_1":
-                from models.ColorModel_Fat_1 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Fat_2":
-                from models.ColorModel_Fat_2 import TextEmbedding, Supervised
-            if self.name == "Color_Test_Fat_3":
-                from models.ColorModel_Fat_3 import TextEmbedding, Supervised
-
-            if self.name == "Color_Test":
-                from models.ColorModel_X_Cell import TextEmbedding, Supervised
-
             from datasets.ColorDataset import (ReferenceGame)
             DIR_DATA = 'color_data/'
         elif self.type == "Chair":
-
-            if self.name == "Chair_Test":
-                from models.ChairModel import TextEmbedding, Supervised
-                print("chair model int")
-
-            # if self.self.name == "":
-            # if self.self.name == "":
-            # if self.self.name == "":
-
             from datasets.ChairDataset import (ReferenceGame)
             DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
-            # if self.self.name == "":
-            # if self.self.name == "":
-            # if self.self.name == "":
-
             from datasets.CreaturesDataset import (ReferenceGame)
-            from models.CreaturesModel import TextEmbedding, Supervised
             DIR_DATA = 'crea_data/'
 
+        
+        module = __import__(self.file_path)
+        class = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
         #self.num = self.trainDir['number']
@@ -175,13 +144,11 @@ class Engine(object):
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
         #self.dataTest = self.test_loader.data
 
-        self.sup_emb = TextEmbedding(self.vocab_size).to(self.device)
-        self.sup_img = Supervised(self.sup_emb, device=self.device).to(self.device)
+        self.sup_img = class(self.vocab_size, device=self.device).to(self.device)
 
 
         self.optimizer = torch.optim.Adam(
             chain(
-                self.sup_emb.parameters(), 
                 self.sup_img.parameters(),
             ), lr=self.lr)
 
@@ -211,61 +178,6 @@ class Engine(object):
             file1.write(str(self.accuracy))
             file1.close()
         
-        # if (self.distance == 'close'):
-        #     if (self.bi):
-
-        #         if path.exists('plot_data/' + 'plot_close_bi.txt'):    
-        #             with open('plot_data/' + 'plot_close_bi.txt','a') as f:
-        #                 f.write('\n' + str(self.accuracy))
-        #                 f.flush()
-        #         else:
-        #             completeName = os.path.join("plot_data", 'plot_close_bi.txt')         
-        #             file1 = open(completeName, "w")
-        #             file1.write(str(self.accuracy))
-        #             file1.close()
-
-        #     else:
-            
-        #         if path.exists('plot_data/' + 'plot_close_nonbi.txt'):    
-        #             with open('plot_data/' + 'plot_close_nonbi.txt','a') as f:
-        #                 f.write('\n' + str(self.accuracy))
-        #                 f.flush()
-        #         else:
-        #             completeName = os.path.join("plot_data", 'plot_close_nonbi.txt')         
-        #             file1 = open(completeName, "w")
-        #             file1.write(str(self.accuracy))
-        #             file1.close()
-
-        # elif (self.distance == 'far'):
-        #     if (self.bi):
-
-        #         if path.exists('plot_data/' + 'plot_far_bi.txt'):    
-        #             with open('plot_data/' + 'plot_far_bi.txt','a') as f:
-        #                 f.write('\n' + str(self.accuracy))
-        #                 f.flush()
-        #         else:
-        #             completeName = os.path.join("plot_data", 'plot_far_bi.txt')         
-        #             file1 = open(completeName, "w")
-        #             file1.write(str(self.accuracy))
-        #             file1.close()
-
-        #     else:
-            
-        #         if path.exists('plot_data/' + 'plot_far_nonbi.txt'):    
-        #             with open('plot_data/' + 'plot_far_nonbi.txt','a') as f:
-        #                 f.write('\n' + str(self.accuracy))
-        #                 f.flush()
-        #         else:
-        #             completeName = os.path.join("plot_data", 'plot_far_nonbi.txt')         
-        #             file1 = open(completeName, "w")
-        #             file1.write(str(self.accuracy))
-        #             file1.close()
-
-        # ref_dataset = Colors_ReferenceGame(self.vocab, split='Test',dis=self.distance)
-        # l3 = [x for x in ref_dataset.vocab if x not in self.train_dataset.vocab]
-        # print(l3)
-
-    
 
     def __init_model(self, config):
         print("init model")
@@ -275,7 +187,7 @@ class Engine(object):
         print(colored("==begining data (config)==", 'magenta'))
         print(colored("name: "+ self.name , 'cyan'))
         print(colored("bi: "+ str(self.bi) , 'cyan'))
-        print(colored("filePath: "+ self.filePath , 'cyan'))
+        print(colored("Class Name: "+ self.class_name , 'cyan'))
         print(colored("learning rate: "+ str(self.lr) , 'cyan'))
         print(colored("batch size: "+ str(self.bs) , 'cyan'))
         print(colored("epochs: "+ str(self.epochs) , 'cyan'))
@@ -300,7 +212,6 @@ class Engine(object):
 
             save_checkpoint({
                 'epoch': epoch,
-                'sup_emb': self.sup_emb.state_dict(),
                 'sup_img': self.sup_img.state_dict(),
                 'track_loss': track_loss,
                 'optimizer': self.optimizer.state_dict(),
@@ -312,19 +223,18 @@ class Engine(object):
     def train_one_epoch(self, epoch): 
         #train a single epoch 
 
-        train_loss = train(epoch,self.sup_emb,self.sup_img,self.train_loader,self.device,self.optimizer)
+        train_loss = train(epoch,self.sup_img,self.train_loader,self.device,self.optimizer)
         return train_loss
 
     def validate_one_epoch(self, epoch): 
         # validate a single epoch 
-        test_loss = test(epoch,self.sup_emb,self.sup_img,self.test_loader,self.device,self.optimizer)
+        test_loss = test(epoch,self.sup_img,self.test_loader,self.device,self.optimizer)
         return test_loss
 
     def load_model(self,folder=DIR+DIR_DATA, filename='checkpoint.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         track_loss = checkpoint['track_loss']
-        sup_emb = checkpoint['sup_emb']
         sup_img = checkpoint['sup_img']
         vocab = checkpoint['vocab']
         vocab_size = checkpoint['vocab_size']
@@ -332,13 +242,12 @@ class Engine(object):
         print(colored("==begining data (loaded model)==", 'magenta'))
         print(colored("epoch: "+ str(epoch) , 'cyan'))
         print(colored("track loss: "+ str(track_loss) , 'cyan'))
-        print(colored("sup emb: "+ str(sup_emb) , 'cyan'))
         print(colored("sup img: "+ str(sup_img) , 'cyan'))
         print(colored("vocab: "+ str(vocab) , 'cyan'))
         print(colored("vocab size: "+ str(vocab_size) , 'cyan'))
         print(colored("==ending data (loaded model)==", 'magenta'))
         print(" ")
-        return epoch, track_loss, sup_emb, sup_img, vocab, vocab_size
+        return epoch, track_loss, sup_img, vocab, vocab_size
 
     def load_best(self, folder=DIR+DIR_DATA, filename='model_best.pth.tar'):
         checkpoint = torch.load(folder + filename)

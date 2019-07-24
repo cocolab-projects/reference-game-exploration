@@ -1,0 +1,22 @@
+{
+    "seed": 1,
+    "name": "Chair_Test",
+    "out_dir": "chair_data",
+    "model": [
+      {
+        "type": "Chair",
+        "class_name": "Test",
+        "file_path": "../models/MultiModel.py",
+        "dis": "far"
+      }
+    ],
+    "training": [
+        {
+          "batch_size": 100,
+          "learning_rate": 0.0002,
+          "epochs": 40,
+          "dim": 5,
+          "log_interval": 10
+        }
+      ]
+  }

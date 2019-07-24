@@ -16,8 +16,7 @@ from torchvision.utils import save_image
 from utils import (AverageMeter, save_checkpoint)
 
 
-def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
-    sup_emb.train()
+def train(epoch, sup_img,train_loader,device,optimizer):
     sup_img.train()
 
     loss_meter = AverageMeter()
@@ -54,8 +53,7 @@ def train(epoch, sup_emb, sup_img,train_loader,device,optimizer):
     return loss_meter.avg
 
 
-def test(epoch, sup_emb, sup_img, test_loader,device,optimizer):
-    sup_emb.eval()
+def test(epoch, sup_img, test_loader,device,optimizer):
     sup_img.eval()
 
     with torch.no_grad():
