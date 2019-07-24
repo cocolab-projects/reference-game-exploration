@@ -165,15 +165,13 @@ class Supervised(nn.Module):
 
         rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim)
         output = []
-        breakpoint()
 
-        hx = torch.randn(100, 10, 64)
+        hx = torch.randn(10, 64)
         for i in range(embed_seq.size(0)):
             hx = rnn(embed_seq[i], hx)
             output.append(hx)
         txt_hidden = torch.cat(output)
 
-        breakpoint()
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
 
         # print("Hi")
