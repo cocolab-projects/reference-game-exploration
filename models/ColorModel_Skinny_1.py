@@ -36,7 +36,8 @@ class Supervised(nn.Module):
     def __init__(self, embedding_module,
      bi = True, 
      width = "Skinny", 
-     number = 1, rgb_dim=3):
+     number = 1, rgb_dim=3,
+     device=None):
         super(Supervised, self).__init__()
 
         self.rgb_dim = rgb_dim

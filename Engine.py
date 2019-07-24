@@ -176,7 +176,7 @@ class Engine(object):
         #self.dataTest = self.test_loader.data
 
         self.sup_emb = TextEmbedding(self.vocab_size).to(self.device)
-        self.sup_img = Supervised(self.sup_emb).to(self.device)
+        self.sup_img = Supervised(self.sup_emb, device=self.device).to(self.device)
 
 
         self.optimizer = torch.optim.Adam(

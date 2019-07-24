@@ -40,10 +40,12 @@ class Supervised(nn.Module):
         embedding_module,
         bi = True, 
         width = "Medium", 
-        number = 2, rgb_dim=3
+        number = 2, 
+        rgb_dim=3,
+        device=None
     ):
         super().__init__()
-
+        self.device = device
         self.rgb_dim = rgb_dim
         self.embedding = embedding_module
         self.embedding_dim = embedding_module.embedding.embedding_dim
@@ -165,7 +167,7 @@ class Supervised(nn.Module):
 
         rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 4)
         output = []
-        hx = torch.randn(10, 64)
+        hx = torch.randn(10, 64).to(self.device)
         for i in range(embed_seq.size(0)):
             hx = rnn(embed_seq[i], hx)
             output.append(hx)

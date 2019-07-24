@@ -40,7 +40,8 @@ class Supervised(nn.Module):
         embedding_module,
         bi = True, 
         width = "Medium", 
-        number = 2, rgb_dim=3
+        number = 2, rgb_dim=3,
+        device=None
     ):
         super().__init__()
 
