@@ -24,6 +24,7 @@ import fileinput
 import time 
 from torchvision import transforms
 import importlib.util
+from importlib.machinery import SourceFileLoader
 
 
 
@@ -119,7 +120,7 @@ class Engine(object):
             DIR_DATA = 'crea_data/'
 
         breakpoint()
-        module = __import__(self.file_path)
+        module = __import__("MultiModel.py")
         sup = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
