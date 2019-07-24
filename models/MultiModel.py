@@ -22,7 +22,7 @@ class TextEmbedding(nn.Module):
         return self.embedding(x)
 
 
-class Supervised(nn.Module):
+class Test(nn.Module):
     """
     x: text, y: image, z: latent
     Model p(z|x,y)
