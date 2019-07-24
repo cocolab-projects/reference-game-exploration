@@ -126,8 +126,8 @@ class Engine(object):
         split = word.split('/', 0)) 
         name = os.path.basename(self.file_path)
         text = self.file_path.replace(name,"")
-        
-        sys.path.append(os.path.dirname(self.file_path)) 
+
+        sys.path.append(os.path.dirname(self.file_path)
         module = __import__(self.file_path)
         sup = getattr(module, self.class_name)
 
