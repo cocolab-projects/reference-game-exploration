@@ -118,7 +118,7 @@ class Engine(object):
             from datasets.CreaturesDataset import (ReferenceGame)
             DIR_DATA = 'crea_data/'
 
-        
+        breakpoint()
         module = __import__(self.file_path)
         sup = getattr(module, self.class_name)
 
