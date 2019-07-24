@@ -168,7 +168,6 @@ class Supervised(nn.Module):
         # txt_hidden = self.txt_lin(hidden)
 
         output = []
-        breakpoint()
         hx = torch.randn(10, 64).to(self.device)
         for i in range(embed_seq.size(0)):
             hx = self.rnn(embed_seq[i], hx)
