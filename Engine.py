@@ -175,8 +175,8 @@ class Engine(object):
         self.test_loader = DataLoader(self.test_dataset, shuffle=False, batch_size=self.bs)
         #self.dataTest = self.test_loader.data
 
-        self.sup_emb = TextEmbedding(self.vocab_size)
-        self.sup_img = Supervised(self.sup_emb)
+        self.sup_emb = TextEmbedding(self.vocab_size).to(self.device)
+        self.sup_img = Supervised(self.sup_emb).to(self.device)
         self.sup_emb = self.sup_emb.to(self.device)
         self.sup_img = self.sup_img.to(self.device)
         self.optimizer = torch.optim.Adam(
