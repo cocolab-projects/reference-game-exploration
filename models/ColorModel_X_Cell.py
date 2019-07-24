@@ -69,6 +69,8 @@ class Supervised(nn.Module):
         self.sequential = None
         self.hidden = []
         self.number = number
+        self.rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 4)
+
         if (number == 1):
             if (width=='Skinny'):
                 self.sequential = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim // 4), \
@@ -165,12 +167,11 @@ class Supervised(nn.Module):
         # # print(hidden)
         # txt_hidden = self.txt_lin(hidden)
 
-        rnn = nn.GRUCell(self.embedding_dim, self.hidden_dim // 4)
         output = []
         breakpoint()
         hx = torch.randn(10, 64).to(self.device)
         for i in range(embed_seq.size(0)):
-            hx = rnn(embed_seq[i], hx)
+            hx = self.rnn(embed_seq[i], hx)
             output.append(hx)
         txt_hidden = torch.cat(output)
 
