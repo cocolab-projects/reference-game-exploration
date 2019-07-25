@@ -51,6 +51,7 @@ class Supervised(nn.Module):
 
         self.hidden_dim = 256
 
+        #IF BIDIRECTIONAL IS TRUE MAKE RGB TO RNN DOUBLE TE SIZE AND REFORAMT TO PACKED SIZE(1)
         self.gru = nn.GRU(self.embedding_dim, self.hidden_dim, batch_first=True, bidirectional=bi)
         self.txt_lin = nn.Linear(self.hidden_dim, self.hidden_dim // 2)
         self.rgb_seq = nn.Sequential(
@@ -148,10 +149,13 @@ class Supervised(nn.Module):
             embed_seq,
             sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
 
+        #CHANGE
+        #rgb_hidden to input_lay
         input_lay = self.rgb_to_rnn(rgb)
         rgb_hidden = self.rgb_seq(rgb)
-
+        breakpoint()
         squeezed_rgb = input_lay.unsqueeze(0)
+        #IF BIDIRECTIONAL IS TRUE MAKE RGB TO RNN DOUBLE TE SIZE AND REFORAMT TO PACKED SIZE(2)
         formatted_rgb = torch.cat((squeezed_rgb, squeezed_rgb), dim=0)
         # layer = self.txt_lin(rgb_hidden)
 
@@ -163,14 +167,12 @@ class Supervised(nn.Module):
             hidden = hidden[reversed_idx]
         # print(hidden)
         txt_hidden = self.txt_lin(hidden)
+        #HIDDEN DIM HALF THE SIZE
+
+        
+        
+        
+        #OTHER OPTIONS IS ONLY TAKE HIDDEN NO CONCAT (done)
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
-        # for layer in self.hidden:
-        #     concat = F.relu(layer(concat))
-
- 
-
-        # print("Hi")
-        # print (self.sequential(concat))
-        # print (self.sequential(self.sequential(concat)))
 
         return self.sequential(concat)

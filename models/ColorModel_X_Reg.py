@@ -148,11 +148,7 @@ class Supervised(nn.Module):
             embed_seq,
             sorted_lengths.data.tolist() if batch_size > 1 else length.data.tolist(), batch_first=True)
 
-        input_lay = self.rgb_to_rnn(rgb)
         rgb_hidden = self.rgb_seq(rgb)
-
-        squeezed_rgb = input_lay.unsqueeze(0)
-        formatted_rgb = torch.cat((squeezed_rgb, squeezed_rgb), dim=0)
         # layer = self.txt_lin(rgb_hidden)
 
         _, hidden = self.gru(packed)
@@ -162,15 +158,10 @@ class Supervised(nn.Module):
             _, reversed_idx = torch.sort(sorted_idx)
             hidden = hidden[reversed_idx]
         # print(hidden)
-        txt_hidden = self.txt_lin(hidden)
-        concat = torch.cat((txt_hidden, rgb_hidden), 1)
-        # for layer in self.hidden:
-        #     concat = F.relu(layer(concat))
+
+        #HIDDEN DIM HALF THE SIZE
+        concat = torch.cat((hidden, rgb_hidden), 1)
 
  
-
-        # print("Hi")
-        # print (self.sequential(concat))
-        # print (self.sequential(self.sequential(concat)))
 
         return self.sequential(concat)

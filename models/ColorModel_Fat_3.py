@@ -35,7 +35,7 @@ class Supervised(nn.Module):
     # Number = number of hidden layers after concat (1,2,3)
     def __init__(self, embedding_module,
      bi = True, 
-     width = "Skinny", 
+     width = "Fat", 
      number = 3, rgb_dim=3,
      device=None):
         super(Supervised, self).__init__()

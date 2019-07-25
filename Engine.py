@@ -122,14 +122,14 @@ class Engine(object):
             from datasets.CreaturesDataset import (ReferenceGame)
             DIR_DATA = 'crea_data/'
 
-        breakpoint()
-        split = self.file_path.split('/', 0)
-        name = os.path.basename(self.file_path)
-        f_path = self.file_path.replace(name,"")
+        # breakpoint()
+        # split = self.file_path.split('/', 0)
+        # name = os.path.basename(self.file_path)
+        # f_path = self.file_path.replace(name,"")
 
-        sys.path.append(os.path.dirname(f_path))
-        module = __import__(name)
-        sup = getattr(module, self.class_name)
+        # sys.path.append(os.path.dirname(f_path))
+        # module = __import__(name)
+        # sup = getattr(module, self.class_name)
 
         self.lr = self.trainDir['learning_rate']
         #self.num = self.trainDir['number']

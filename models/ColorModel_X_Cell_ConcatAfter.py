@@ -151,6 +151,8 @@ class Supervised(nn.Module):
             hx = self.basic_layer(hx)
             hx = torch.cat((hx, rgb_hidden), 1)
             
-   
+        
+        hx = torch.cat((hx, rgb_hidden), 1)
+
         
         return hx
