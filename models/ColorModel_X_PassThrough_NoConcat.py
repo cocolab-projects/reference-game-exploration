@@ -165,5 +165,6 @@ class Supervised(nn.Module):
         if batch_size > 1:
             _, reversed_idx = torch.sort(sorted_idx)
             hidden = hidden[reversed_idx]
+        #HIDDEN DIM HALF THE SIZE
 
         return self.sequential(concat)

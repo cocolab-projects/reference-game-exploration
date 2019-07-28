@@ -121,7 +121,6 @@ class Engine(object):
         elif self.type == "Creatures":
             from datasets.CreaturesDataset import (ReferenceGame)
             DIR_DATA = 'crea_data/'
-
         # breakpoint()
         # split = self.file_path.split('/', 0)
         # name = os.path.basename(self.file_path)

@@ -170,8 +170,6 @@ class Supervised(nn.Module):
         #HIDDEN DIM HALF THE SIZE
 
         
-        
-        
         #OTHER OPTIONS IS ONLY TAKE HIDDEN NO CONCAT (done)
         concat = torch.cat((txt_hidden, rgb_hidden), 1)
 

@@ -159,7 +159,6 @@ class Supervised(nn.Module):
             hidden = hidden[reversed_idx]
         # print(hidden)
 
-        #HIDDEN DIM HALF THE SIZE
         concat = torch.cat((hidden, rgb_hidden), 1)
 
  
