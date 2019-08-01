@@ -113,14 +113,36 @@ class Engine(object):
 
 
         if self.type == "Color":
-            from datasets.ColorDataset import (ReferenceGame)
+            from src.rge.datasets.ColorDataset import (ReferenceGame)
             DIR_DATA = 'color_data/'
         elif self.type == "Chair":
-            from datasets.ChairDataset import (ReferenceGame)
+            from src.rge.datasets.ChairDataset import (ReferenceGame)
             DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
-            from datasets.CreaturesDataset import (ReferenceGame)
+            from src.rge.datasets.CreaturesDataset import (ReferenceGame)
             DIR_DATA = 'crea_data/'
+        
+        
+
+
+        name = os.path.basename(self.file_path)
+        f_path = self.file_path.replace(name,"")
+        name = name.replace('.py','')
+
+
+        sys.path.append(os.path.dirname(f_path))
+
+        module = __import__(name)
+        
+
+        while (os.path.dirname(f_path) in sys.path):    
+            sys.path.remove(os.path.dirname(f_path))
+        
+        sup = getattr(module, self.class_name)
+
+        #module = __import__(module_name)
+        #class_ = getattr(module, class_name)
+        #instance = class_()
         # breakpoint()
         # split = self.file_path.split('/', 0)
         # name = os.path.basename(self.file_path)
@@ -224,8 +246,8 @@ class Engine(object):
                 'optimizer': self.optimizer.state_dict(),
                 'vocab': self.vocab,
                 'vocab_size': self.vocab_size,
-            }, is_best, folder=self.out_dir)
-            np.save(os.path.join(DIR+self.out_dir, 'loss.npy'), track_loss)
+            }, is_best, folder=DIR_DATA)
+            np.save(os.path.join(DIR_DATA, 'loss.npy'), track_loss)
         self.time = time.time() - t0
     def train_one_epoch(self, epoch): 
         #train a single epoch 
@@ -238,7 +260,7 @@ class Engine(object):
         test_loss = test(epoch,self.sup_img,self.test_loader,self.device,self.optimizer)
         return test_loss
 
-    def load_model(self,folder=DIR+DIR_DATA, filename='checkpoint.pth.tar'):
+    def load_model(self,folder=DIR_DATA, filename='checkpoint.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         track_loss = checkpoint['track_loss']
@@ -256,7 +278,7 @@ class Engine(object):
         print(" ")
         return epoch, track_loss, sup_img, vocab, vocab_size
 
-    def load_best(self, folder=DIR+DIR_DATA, filename='model_best.pth.tar'):
+    def load_best(self, folder=DIR_DATA, filename='model_best.pth.tar'):
         checkpoint = torch.load(folder + filename)
         epoch = checkpoint['epoch']
         

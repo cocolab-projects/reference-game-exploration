@@ -5,8 +5,8 @@
     "model": [
       {
         "type": "Chair",
-        "class_name": "Test",
-        "file_path": "../models/MultiModel.py",
+        "class_name": "Testing",
+        "file_path": "/Users/user/Desktop/Models/Completed_Model_Refrence.py",
         "dis": "far"
       }
     ],
