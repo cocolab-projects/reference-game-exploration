@@ -17,7 +17,7 @@ from collections import defaultdict
 import Engine
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, 'data')
-NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/'
+NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/'  # no hardcoding please
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
@@ -29,12 +29,15 @@ MIN_USED = 2
 MAX_LEN = 10
 
 class ReferenceGame(data.Dataset):
+    # add a parameter for data_dir 
     def __init__(self, vocab=None, split='Train', train=True, context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
 
         NUMPY_DIR = datasets.utils.DIR + '/chairs_img_npy/'
 
         super(ReferenceGame, self).__init__()
+        
+        # add commment for what easy and hard mean...
         assert split_mode in ['easy', 'hard']
         self.names = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/names.npy'))
         self.images = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/images.npy'))
@@ -289,6 +292,7 @@ class ReferenceGame(data.Dataset):
         targets = torch.from_numpy(targets).long()
         trans = transforms.ToTensor()
 
+        # comment
         if (label == 2):
             temp = chair_a
             temp1 = chair_b
@@ -303,6 +307,7 @@ class ReferenceGame(data.Dataset):
         return trans(chair_a), trans(chair_b), trans(chair_c), inputs, length
 
 def preprocess_text(text):
+    # FIXME
     text = text.lower() 
     tokens = word_tokenize(text)
     i = 0

@@ -23,12 +23,15 @@ from nltk.tokenize import RegexpTokenizer
 
 from collections import defaultdict
 
+# share this code across dataset files
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, '../data')
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
 PAD_TOKEN = '<pad>'
 UNK_TOKEN = '<unk>'
+
+# in config ... under dataset_settings
 TRAINING_PERCENTAGE = 64 / 100
 TESTING_PERCENTAGE = 20 / 100
 MIN_USED = 2
@@ -128,6 +131,7 @@ class ReferenceGame(data.Dataset):
                 concat_texts.append(concat)
                 concat = texts[i]
         return tgt_RGBs, d1_RGBs, d2_RGBs, concat_texts
+    
     def build_vocab(self, texts):
         w2c = defaultdict(int)
         i2w, w2i = {}, {}

@@ -1,0 +1,24 @@
+{
+    "seed": 1,
+    "name": "Color_Test_Cell_ConcatAfter",
+    "out_dir": "color_data/",
+    "gpu": "9",
+    "dir": "/Users/user/Documents/GitHub/mnt/fs5/rona03/",
+    "model": [
+      {
+        "type": "Color",
+        "class_name": "Supervised",
+        "file_path": "/Users/user/Desktop/Models/ColorModel_X_Cell_ConcatAfter.py",
+        "dis": "far"
+      }
+    ],
+    "training": [
+        {
+          "batch_size": 100,
+          "learning_rate": 0.0002,
+          "epochs": 20,
+          "dim": 5,
+          "log_interval": 10
+        }
+      ]
+  }

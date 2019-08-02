@@ -3,16 +3,17 @@ import os.path
 from os import path
 import nltk, collections
 
-import random 
 import sys
-
-
+import json
+import random 
 
 import numpy as np
 from tqdm import tqdm
 from itertools import chain
 import matplotlib.pyplot as plt
-import json
+
+# from src.Train import test, train
+# from src.utils. import AverageMeter
 from Train import test,train
 from colorama import init 
 from termcolor import colored 
@@ -32,12 +33,13 @@ from importlib.machinery import SourceFileLoader
 
 
 DIR = ''
-DIR_DATA = ''
+DIR_DATA = ''  # crazyh!
 #Run through list in the data folder?
 
 class Engine(object):
-    movable_dir = DIR
     def __init__ (self):
+        global DIR
+        global DIR_DATA
 
         import argparse
         parser = argparse.ArgumentParser()
@@ -65,7 +67,7 @@ class Engine(object):
         self.device = torch.device('cuda:'+ self.gpu if args.cuda else 'cpu')
         self.image_transforms = transforms.Resize(32)
 
-
+        # get rid of extra spaces
 
         self.loss = None
         self.accuracy = None
@@ -82,8 +84,8 @@ class Engine(object):
 
         assert self.parsed
         self.seed = self.parsed['seed']
-
         
+        print("Dir: " + DIR)
         if path.exists(DIR+ 'seeds_save/' + 'seed.txt'):
             seedNew = random.randint(1,1000001)
             self.seed = seedNew 
@@ -100,7 +102,7 @@ class Engine(object):
 
 
         self.out_dir = self.parsed['out_dir']
-
+        DIR_DATA = self.out_dir
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
 
@@ -117,13 +119,10 @@ class Engine(object):
 
         if self.type == "Color":
             from datasets.ColorDataset import (ReferenceGame)
-            DIR_DATA = 'color_data/'
         elif self.type == "Chair":
             from datasets.ChairDataset import (ReferenceGame)
-            DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
             from datasets.CreaturesDataset import (ReferenceGame)
-            DIR_DATA = 'crea_data/'
         
         
 
@@ -142,6 +141,8 @@ class Engine(object):
             sys.path.remove(os.path.dirname(f_path))
         
         sup = getattr(module, self.class_name)
+
+        # get rid of commented out things unless important
 
         #module = __import__(module_name)
         #class_ = getattr(module, class_name)
@@ -165,6 +166,7 @@ class Engine(object):
         self.log_interval = self.trainDir['log_interval']
 
 
+        # pylint to make nice indents
         self.train_dataset = ReferenceGame(split='Train', context_condition=self.distance, image_transform=self.image_transforms)
         #self.dataTrain = self.train_dataset.data
         self.train_loader = DataLoader(self.train_dataset, shuffle=True, batch_size=self.bs)
@@ -252,6 +254,7 @@ class Engine(object):
             }, is_best, folder=DIR_DATA)
             np.save(os.path.join(DIR_DATA, 'loss.npy'), track_loss)
         self.time = time.time() - t0
+    
     def train_one_epoch(self, epoch): 
         #train a single epoch 
 
@@ -355,11 +358,13 @@ class Engine(object):
             
         print(colored("==ending data (final loss)==", 'magenta'))
         print("")
+    
     def final_time(self):
         print(colored("==begining data (final time)==", 'magenta'))
         print(colored('====> Final Time: {:.4f}'.format(self.time),'cyan'))
         print(colored("==ending data (final time)==", 'magenta'))
         print("")
+    
     def final_perplexity(self):
         corpus = ""
         perp = 0
@@ -419,5 +424,6 @@ class Engine(object):
             perplexity = perplexity * (1/model[word])
         perplexity = pow(perplexity, 1/float(N)) 
         return perplexity
+
 if __name__ == '__main__':
     run = Engine()

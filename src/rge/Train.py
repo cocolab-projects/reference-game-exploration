@@ -36,7 +36,6 @@ def train(epoch, sup_img,train_loader,device,optimizer):
 
         # loss between actual and predicted rgb: Mean Squared Loss !!
         loss = F.cross_entropy(torch.cat([tgt_score,d1_score,d2_score], 1), torch.LongTensor(np.zeros(batch_size)).to(device))
-        
 
         loss_meter.update(loss.item(), batch_size)
         optimizer.zero_grad()

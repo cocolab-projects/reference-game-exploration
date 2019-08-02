@@ -17,7 +17,7 @@ FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 DATA_DIR = os.path.join(FILE_DIR, '../data/pilot_coll1/')
 RAW_DIR = os.path.join(FILE_DIR, '../data')
 
-NUMPY_DIR = ''
+NUMPY_DIR = ''  #dont do this
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
@@ -199,8 +199,6 @@ class ReferenceGame(data.Dataset):
         image_np_2_PIL = Image.open(image_np_2)
         image_np_tgt_PIL = Image.open(image_np_tgt)
 
-
-
         if self.image_transform is not None:
             image_np_1_PIL = self.image_transform(image_np_1_PIL)
             image_np_2_PIL = self.image_transform(image_np_2_PIL)
@@ -214,6 +212,7 @@ class ReferenceGame(data.Dataset):
         return trans(image_np_tgt_PIL), trans(image_np_1_PIL), trans(image_np_2_PIL), inputs, length
 
 def preprocess_text(text):
+    # FIXME
     text = text.lower() 
     tokens = word_tokenize(text)
     i = 0

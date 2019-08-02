@@ -36,5 +36,3 @@ for token in w2c.keys():
         w2i[token] = indexCount
         i2w[indexCount] = token
         indexCount += 1
-
-breakpoint()
