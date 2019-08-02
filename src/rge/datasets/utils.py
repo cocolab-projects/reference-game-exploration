@@ -9,6 +9,8 @@ from tqdm import tqdm
 from itertools import chain
 from collections import Counter, OrderedDict
 
+DIR = ''
+
 class OrderedCounter(Counter, OrderedDict):
      'Counter that remembers the order elements are first seen'
      def __repr__(self):

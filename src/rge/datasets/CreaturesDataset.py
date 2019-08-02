@@ -12,12 +12,12 @@ import torch
 import torch.utils.data as data
 from torchvision import transforms
 from collections import defaultdict
-
+import datasets
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 DATA_DIR = os.path.join(FILE_DIR, '../data/pilot_coll1/')
 RAW_DIR = os.path.join(FILE_DIR, '../data')
 
-NUMPY_DIR = '/mnt/fs5/rona03/crea_img_npy'
+NUMPY_DIR = ''
 
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
@@ -32,6 +32,8 @@ class ReferenceGame(data.Dataset):
     def __init__(self, vocab=None, split='Validation', train=True, context_condition='all', 
                  image_size=32, image_transform=None, dataVal=None):
         super(ReferenceGame, self).__init__()
+        
+        NUMPY_DIR = datasets.utils.DIR + '/crea_img_npy/'
 
         self.split = split
        

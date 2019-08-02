@@ -9,12 +9,12 @@ import pandas as pd
 from PIL import Image
 from utils import OrderedCounter
 from nltk import sent_tokenize, word_tokenize
-
+import datasets.utils
 import torch
 import torch.utils.data as data
 from torchvision import transforms
 from collections import defaultdict
-
+import Engine
 FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 RAW_DIR = os.path.join(FILE_DIR, 'data')
 NUMPY_DIR = '/mnt/fs5/rona03/chairs_img_npy/'
@@ -31,6 +31,9 @@ MAX_LEN = 10
 class ReferenceGame(data.Dataset):
     def __init__(self, vocab=None, split='Train', train=True, context_condition='all', 
                  split_mode='easy', image_size=32, image_transform=None, dataVal=None):
+
+        NUMPY_DIR = datasets.utils.DIR + '/chairs_img_npy/'
+
         super(ReferenceGame, self).__init__()
         assert split_mode in ['easy', 'hard']
         self.names = np.load(os.path.join(NUMPY_DIR, 'numpy/numpy/names.npy'))

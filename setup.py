@@ -4,8 +4,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
      name='rge',  
-     version='0.1',
+     version='0.4',
      author="Ron Arel",
+     scripts=['rge_pkg/rge'] ,
      author_email="RonArel123@gmail.com",
      description="Engine for Refrence Game Tests",
      long_description=long_description,

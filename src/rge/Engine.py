@@ -31,50 +31,53 @@ from importlib.machinery import SourceFileLoader
 
 
 
-DIR = '/mnt/fs5/rona03/'
+DIR = ''
 DIR_DATA = ''
 #Run through list in the data folder?
 
 class Engine(object):
-    
+    movable_dir = DIR
     def __init__ (self):
 
         import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument('dir', type=str, help="directory of config file")
-        parser.add_argument('--file_name', type=str, help="name of file [default: config.json]", default="config.json")
         parser.add_argument('--full_diagnostic', type=str, help="run full diagnostic (print) [default: false]", default=False)
 
 
         # parser.add_argument('--dir', type=int, help="directory of config file" default="data/data.json")
         parser.add_argument('--cuda', action='store_true', help='Enable cuda')
         args = parser.parse_args()
-        self.time = 0
+        self.dir = args.dir
+        self.config = self.dir
+        self.parsed = {}
+        with open(self.config) as f:
+            self.parsed = json.load(f)
+        self.gpu = self.parsed['gpu']
+        self.dir_data_config = self.parsed['dir']
+        from datasets import utils
+        DIR = self.dir_data_config
+        utils.DIR = DIR
 
+        self.time = 0
         args.cuda = args.cuda and torch.cuda.is_available()
         self.fd = args.full_diagnostic
-        self.device = torch.device('cuda' if args.cuda else 'cpu')
+        self.device = torch.device('cuda:'+ self.gpu if args.cuda else 'cpu')
         self.image_transforms = transforms.Resize(32)
 
 
 
         self.loss = None
         self.accuracy = None
-        self.parsed = {}
-        self.dir = args.dir
-        self.fileName = args.file_name
         if (self.fd):
             print(" ")
             print(colored("==begining data (args put in)==", 'magenta'))
             print(colored("Directory: "+ self.dir, 'cyan'))
-            print(colored("File Name: "+ self.fileName, 'cyan'))
             print(colored("==ending data (args put in)==", 'magenta'))
             print(" ")
 
 
-        self.config = self.dir + "/" + self.fileName
-        with open(self.config) as f:
-            self.parsed = json.load(f)
+        
             # print(self.parsed)
 
         assert self.parsed
@@ -113,13 +116,13 @@ class Engine(object):
 
 
         if self.type == "Color":
-            from src.rge.datasets.ColorDataset import (ReferenceGame)
+            from datasets.ColorDataset import (ReferenceGame)
             DIR_DATA = 'color_data/'
         elif self.type == "Chair":
-            from src.rge.datasets.ChairDataset import (ReferenceGame)
+            from datasets.ChairDataset import (ReferenceGame)
             DIR_DATA = 'chair_data/'
         elif self.type == "Creatures":
-            from src.rge.datasets.CreaturesDataset import (ReferenceGame)
+            from datasets.CreaturesDataset import (ReferenceGame)
             DIR_DATA = 'crea_data/'
         
         
@@ -416,5 +419,5 @@ class Engine(object):
             perplexity = perplexity * (1/model[word])
         perplexity = pow(perplexity, 1/float(N)) 
         return perplexity
-
-run = Engine()
+if __name__ == '__main__':
+    run = Engine()

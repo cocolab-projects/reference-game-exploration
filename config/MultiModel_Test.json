@@ -1,10 +1,12 @@
 {
     "seed": 1,
-    "name": "Chair_Test",
-    "out_dir": "chair_data",
+    "name": "Color_Test",
+    "out_dir": "color_data",
+    "gpu": "9",
+    "dir": "/Users/user/Documents/GitHub/mnt/fs5/rona03/",
     "model": [
       {
-        "type": "Chair",
+        "type": "Color",
         "class_name": "Testing",
         "file_path": "/Users/user/Desktop/Models/Completed_Model_Refrence.py",
         "dis": "far"
