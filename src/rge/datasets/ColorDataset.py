@@ -46,7 +46,8 @@ class ReferenceGame(data.Dataset):
         # Only pick out data with true outcomes, far(=easy) conditions, and speaker text
         df = df[df['outcome'] == True]
         df = df[df['role'] == 'speaker']
-        df = df[df['condition'] == context_condition]
+        if context_condition != 'all':
+            df = df[df['condition'] == context_condition]
         
         self.texts = []
         self.rounds = []
